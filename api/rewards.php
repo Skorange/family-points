@@ -66,7 +66,7 @@ function getRewards($db, $user) {
         $stmt = $db->prepare('
             SELECT COUNT(*) as cnt FROM redemptions r
             JOIN users u ON r.user_id = u.id
-            WHERE u.family_id = ? AND r.status = 'pending'
+            WHERE u.family_id = ? AND r.status = "pending"
         ');
         $stmt->execute([$user['family_id']]);
         $pendingCount = $stmt->fetch()['cnt'];
@@ -92,7 +92,7 @@ function getPendingRedemptions($db, $user) {
         FROM redemptions r
         JOIN users u ON r.user_id = u.id
         JOIN rewards rw ON r.reward_id = rw.id
-        WHERE u.family_id = ? AND r.status = 'pending'
+        WHERE u.family_id = ? AND r.status = "pending"
         ORDER BY r.created_at DESC
     ');
     $stmt->execute([$user['family_id']]);

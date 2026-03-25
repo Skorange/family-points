@@ -5,180 +5,198 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#FF6B35">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>家庭积分星球</title>
-    <link rel="manifest" href="manifest.json">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary: #FF6B35;
             --primary-light: #FF8E53;
             --bg: #f5f5f5;
-            --card: white;
+            --white: #fff;
             --text: #333;
             --text-light: #888;
             --success: #4CAF50;
             --danger: #f44336;
+            --border: #eee;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
             background: var(--bg);
             color: var(--text);
             max-width: 480px;
             margin: 0 auto;
             min-height: 100vh;
+            padding-bottom: 70px;
         }
         .header {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
-            padding: 20px;
-            text-align: center;
+            padding: 16px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(255,107,53,0.3);
         }
-        .header h1 { font-size: 22px; margin-bottom: 4px; }
-        .header .user { font-size: 14px; opacity: 0.9; }
-        .points-display {
-            background: white;
-            margin: 16px;
-            padding: 24px;
-            border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .points-display .label { color: var(--text-light); font-size: 14px; margin-bottom: 8px; }
-        .points-display .value { font-size: 56px; color: var(--primary); font-weight: bold; line-height: 1; }
-        .points-display .unit { font-size: 20px; color: var(--primary-light); margin-left: 4px; }
-        .tabs {
+        .header-top {
             display: flex;
-            background: white;
-            padding: 0;
-            position: sticky;
-            top: 76px;
-            z-index: 99;
-            border-bottom: 1px solid #eee;
+            justify-content: space-between;
+            align-items: center;
         }
-        .tab {
+        .header h1 { font-size: 18px; }
+        .header .logout { color: white; font-size: 12px; opacity: 0.8; cursor: pointer; }
+        .header .logout:hover { opacity: 1; }
+
+        /* 导航栏 */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--white);
+            display: flex;
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+        .nav-item {
             flex: 1;
-            padding: 14px 8px;
+            padding: 10px 0;
             text-align: center;
             cursor: pointer;
-            font-size: 14px;
             color: var(--text-light);
-            transition: all 0.2s;
-            border-bottom: 3px solid transparent;
+            font-size: 11px;
+            position: relative;
+            transition: color 0.2s;
         }
-        .tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+        .nav-item.active { color: var(--primary); }
+        .nav-item .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-item .badge {
+            position: absolute;
+            top: 4px;
+            right: 20%;
+            background: var(--danger);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .tab:hover { background: #fafafa; }
-        .content { padding: 16px; padding-bottom: 80px; }
+
+        /* 页面内容 */
+        .page { display: none; padding: 16px; }
+        .page.active { display: block; }
+
+        /* 卡片 */
         .card {
-            background: var(--card);
+            background: var(--white);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .card-title { font-weight: 600; font-size: 16px; }
-        .card-badge {
-            background: var(--primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-        .card-meta { font-size: 13px; color: var(--text-light); margin-bottom: 8px; }
-        .task-points {
-            display: inline-block;
-            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-            color: var(--primary);
-            padding: 4px 12px;
-            border-radius: 8px;
+        .card-title {
+            font-size: 16px;
             font-weight: 600;
-            font-size: 14px;
+            margin-bottom: 8px;
         }
+        .card-meta { font-size: 13px; color: var(--text-light); margin-bottom: 4px; }
+
+        /* 积分显示 */
+        .points-big {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .points-big .label { font-size: 14px; color: var(--text-light); }
+        .points-big .value { font-size: 56px; color: var(--primary); font-weight: bold; line-height: 1.2; }
+        .points-big .unit { font-size: 20px; color: var(--primary-light); }
+
+        /* 按钮 */
         .btn {
             display: inline-block;
             background: var(--primary);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
+            text-align: center;
         }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,107,53,0.3); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        .btn:hover { opacity: 0.9; }
+        .btn-block { width: 100%; }
+        .btn-sm { padding: 8px 12px; font-size: 13px; }
         .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: var(--primary); color: white; }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .rank-list { padding: 8px 0; }
-        .rank-item {
+
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            background: #fff3e0;
+            color: var(--primary);
+        }
+        .tag-success { background: #e8f5e9; color: var(--success); }
+        .tag-danger { background: #ffebee; color: var(--danger); }
+        .tag-pending { background: #fff8e1; color: #f9a825; }
+
+        /* 列表项 */
+        .list-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
         }
-        .rank-item:last-child { border-bottom: none; }
-        .rank-num {
-            width: 28px;
-            height: 28px;
-            background: #f0f0f0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 600;
-            margin-right: 12px;
+        .list-item:last-child { border-bottom: none; }
+        .list-item .content { flex: 1; }
+        .list-item .actions { display: flex; gap: 8px; }
+
+        /* 表单 */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 14px; color: var(--text-light); margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
         }
-        .rank-num.top { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
-        .rank-name { flex: 1; font-weight: 500; }
-        .rank-points { color: var(--primary); font-weight: 600; font-size: 16px; }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-        }
-        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+
+        /* 模态框 */
         .modal {
             display: none;
             position: fixed;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            z-index: 200;
+            align-items: flex-end;
         }
         .modal.show { display: flex; }
         .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--white);
             width: 100%;
-            max-width: 360px;
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
             max-height: 80vh;
             overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
         .modal-header {
             font-size: 18px;
@@ -186,31 +204,10 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        .form-group { margin-bottom: 16px; }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            color: var(--text-light);
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .modal-actions .btn { flex: 1; text-align: center; }
+        .modal-footer { display: flex; gap: 12px; margin-top: 20px; }
+        .modal-footer .btn { flex: 1; }
+
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 80px;
@@ -221,43 +218,39 @@
             padding: 12px 24px;
             border-radius: 8px;
             font-size: 14px;
-            z-index: 1001;
-            animation: slideUp 0.3s ease;
+            z-index: 300;
+            animation: fadeIn 0.3s;
         }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+
+        /* 空状态 */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
         }
-        .fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            font-size: 28px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255,107,53,0.4);
-            z-index: 50;
+        .empty .icon { font-size: 48px; margin-bottom: 12px; }
+
+        /* 分割线标题 */
+        .section-title {
+            font-size: 14px;
+            color: var(--text-light);
+            margin: 20px 0 12px;
+            padding-left: 8px;
+            border-left: 3px solid var(--primary);
         }
-        .fab:hover { transform: scale(1.1); }
-        .badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--danger);
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        /* 数字徽章 */
+        .stat-card {
+            text-align: center;
+            padding: 16px;
+            background: var(--white);
+            border-radius: 12px;
         }
+        .stat-card .num { font-size: 28px; color: var(--primary); font-weight: bold; }
+        .stat-card .label { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+        /* 登录页 */
         .login-page {
             min-height: 100vh;
             display: flex;
@@ -267,35 +260,57 @@
             padding: 20px;
         }
         .login-card {
-            background: white;
-            border-radius: 24px;
-            padding: 40px 32px;
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px 24px;
             width: 100%;
-            max-width: 360px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 320px;
         }
-        .login-card h2 { text-align: center; color: var(--primary); margin-bottom: 8px; font-size: 24px; }
-        .login-card p { text-align: center; color: var(--text-light); margin-bottom: 30px; font-size: 14px; }
+        .login-card h2 { text-align: center; font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+        .login-card p { text-align: center; color: var(--text-light); font-size: 14px; margin-bottom: 24px; }
         .login-card input {
             width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            border: 2px solid #eee;
-            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.2s;
         }
         .login-card input:focus { outline: none; border-color: var(--primary); }
-        .login-card .btn { width: 100%; padding: 14px; font-size: 16px; margin-top: 8px; }
-        .login-tabs { display: flex; margin-bottom: 24px; }
-        .login-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid #eee; color: var(--text-light); }
+        .login-tabs { display: flex; margin-bottom: 20px; }
+        .login-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid var(--border); color: var(--text-light); }
         .login-tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
-        .section-title { font-size: 16px; font-weight: 600; margin: 20px 0 12px; color: var(--text-light); }
+
+        /* 浮动添加按钮 */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255,107,53,0.4);
+            z-index: 50;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .toolbar .btn { flex: 1; min-width: 80px; }
     </style>
 </head>
 <body>
     <!-- 登录页 -->
-    <div id="loginPage" class="login-page" style="display: none;">
+    <div id="loginPage" class="login-page">
         <div class="login-card">
             <h2>🎃 积分星球</h2>
             <p>让孩子在快乐中成长</p>
@@ -306,142 +321,147 @@
             <div id="loginForm">
                 <input type="email" id="loginEmail" placeholder="邮箱">
                 <input type="password" id="loginPassword" placeholder="密码">
-                <button class="btn" onclick="handleLogin()">登录</button>
+                <button class="btn btn-block" onclick="handleLogin()">登录</button>
             </div>
-            <div id="registerForm" style="display: none;">
-                <input type="text" id="regUsername" placeholder="你的名字">
+            <div id="registerForm" style="display:none">
+                <input type="text" id="regName" placeholder="你的名字">
                 <input type="email" id="regEmail" placeholder="邮箱">
                 <input type="password" id="regPassword" placeholder="密码（至少6位）">
                 <input type="text" id="regFamily" placeholder="家庭名称（可选）">
-                <button class="btn" onclick="handleRegister()">创建家庭</button>
+                <button class="btn btn-block" onclick="handleRegister()">创建家庭</button>
             </div>
         </div>
     </div>
 
     <!-- 主应用 -->
-    <div id="appPage" style="display: none;">
+    <div id="appPage" style="display:none">
         <div class="header">
-            <h1>🎃 家庭积分星球</h1>
-            <div class="user" id="userInfo">加载中...</div>
-            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);margin-top:8px" onclick="logout()">退出登录</button>
+            <div class="header-top">
+                <h1>🎃 家庭积分星球</h1>
+                <span class="logout" onclick="logout()">退出</span>
+            </div>
+            <div style="font-size:12px;opacity:0.9;margin-top:4px" id="userInfo">家长</div>
         </div>
 
-        <div class="points-display" id="pointsDisplay">
-            <div class="label" id="pointsLabel">我的积分</div>
-            <div class="value"><span id="myPoints">0</span><span class="unit">分</span></div>
+        <!-- 底部导航 -->
+        <nav class="nav">
+            <div class="nav-item active" onclick="switchPage('home')">
+                <span class="icon">🏠</span>
+                <span>首页</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('tasks')">
+                <span class="icon">📋</span>
+                <span>任务</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('shop')">
+                <span class="icon">🎁</span>
+                <span>商城</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('approve')" id="approveNav">
+                <span class="icon">📮</span>
+                <span>审批</span>
+                <span class="badge" id="approveBadge" style="display:none">0</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('settings')">
+                <span class="icon">⚙️</span>
+                <span>我的</span>
+            </div>
+        </nav>
+
+        <!-- 首页 -->
+        <div id="homePage" class="page active">
+            <div id="homeContent"></div>
         </div>
 
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('tasks')">📋 任务</div>
-            <div class="tab" onclick="switchTab('rewards')">🎁 奖励</div>
-            <div class="tab" onclick="switchTab('family')">👨‍👩‍👧 家庭</div>
-            <div class="tab" onclick="switchTab('admin')" id="adminTab" style="display:none">⚙️ 管理</div>
+        <!-- 任务页 -->
+        <div id="tasksPage" class="page">
+            <button class="fab" onclick="showAddTask()" id="addTaskBtn" style="display:none">+</button>
+            <div id="tasksContent"></div>
         </div>
 
-        <div class="content">
-            <!-- 任务列表 -->
-            <div id="tasks" class="tab-content active">
-                <div id="tasksList"></div>
-            </div>
-
-            <!-- 奖励商城 -->
-            <div id="rewards" class="tab-content">
-                <div id="rewardsList"></div>
-                <div class="section-title">我的兑换记录</div>
-                <div id="myRedemptions"></div>
-            </div>
-
-            <!-- 家庭资料 -->
-            <div id="family" class="tab-content">
-                <div id="familyInfo"></div>
-            </div>
-
-            <!-- 排行榜 -->
-            <div id="rank" class="tab-content">
-                <div class="card rank-list" id="rankingList"></div>
-            </div>
-
-            <!-- 管理面板（家长） -->
-            <div id="admin" class="tab-content">
-                <div id="pendingRedemptions"></div>
-                <div class="section-title">创建孩子账号</div>
-                <div class="card">
-                    <div class="form-group">
-                        <input type="text" id="childUsername" placeholder="孩子用户名">
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="childPassword" placeholder="密码">
-                    </div>
-                    <button class="btn" onclick="createChild()">创建账号</button>
-                </div>
-                <div class="section-title">积分调整</div>
-                <div id="childrenList"></div>
-            </div>
+        <!-- 商城页 -->
+        <div id="shopPage" class="page">
+            <button class="fab" onclick="showAddReward()" id="addRewardBtn" style="display:none">+</button>
+            <div id="shopContent"></div>
         </div>
 
-        <!-- 家长浮动按钮 -->
-        <button class="fab" id="addBtn" onclick="showAddModal()" style="display: none;">
-            +
-            <span class="badge" id="pendingBadge" style="display: none;">0</span>
-        </button>
+        <!-- 审批页（家长） -->
+        <div id="approvePage" class="page">
+            <div id="approveContent"></div>
+        </div>
+
+        <!-- 我的页 -->
+        <div id="settingsPage" class="page">
+            <div id="settingsContent"></div>
+        </div>
     </div>
 
-    <!-- 添加任务/奖励模态框 -->
-    <div class="modal" id="addModal">
+    <!-- 添加任务模态框 -->
+    <div class="modal" id="taskModal">
         <div class="modal-content">
-            <div class="modal-header" id="modalTitle">添加任务</div>
-            <div id="taskForm">
-                <div class="form-group">
-                    <label>任务名称</label>
-                    <input type="text" id="taskTitle" placeholder="例如：整理房间">
-                </div>
-                <div class="form-group">
-                    <label>描述（可选）</label>
-                    <textarea id="taskDesc" rows="2" placeholder="任务描述"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>积分奖励</label>
-                    <input type="number" id="taskPoints" value="10" min="1" max="500">
-                </div>
-                <div class="form-group">
-                    <label>重复类型</label>
-                    <select id="taskRepeat">
-                        <option value="once">一次性</option>
-                        <option value="daily">每日</option>
-                        <option value="weekly">每周</option>
-                    </select>
-                </div>
+            <div class="modal-header" id="taskModalTitle">添加任务</div>
+            <input type="hidden" id="editTaskId">
+            <div class="form-group">
+                <label>任务名称</label>
+                <input type="text" id="taskName" placeholder="例如：整理房间">
             </div>
-            <div id="rewardForm" style="display: none;">
-                <div class="form-group">
-                    <label>奖励名称</label>
-                    <input type="text" id="rewardTitle" placeholder="例如：游戏时间30分钟">
-                </div>
-                <div class="form-group">
-                    <label>描述（可选）</label>
-                    <textarea id="rewardDesc" rows="2" placeholder="奖励描述"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>所需积分</label>
-                    <input type="number" id="rewardCost" value="50" min="1">
-                </div>
+            <div class="form-group">
+                <label>描述（可选）</label>
+                <textarea id="taskDesc" rows="2" placeholder="任务描述"></textarea>
             </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal()">取消</button>
-                <button class="btn" id="saveBtn" onclick="saveAdd()">保存</button>
+            <div class="form-group">
+                <label>积分奖励</label>
+                <input type="number" id="taskPoints" value="10" min="1" max="500">
+            </div>
+            <div class="form-group">
+                <label>重复类型</label>
+                <select id="taskRepeat">
+                    <option value="once">一次性</option>
+                    <option value="daily">每日</option>
+                    <option value="weekly">每周</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeTaskModal()">取消</button>
+                <button class="btn" onclick="saveTask()">保存</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast 提示 -->
-    <div id="toast" class="toast" style="display: none;"></div>
+    <!-- 添加奖励模态框 -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-header">添加奖励</div>
+            <div class="form-group">
+                <label>奖励名称</label>
+                <input type="text" id="rewardName" placeholder="例如：游戏时间30分钟">
+            </div>
+            <div class="form-group">
+                <label>描述（可选）</label>
+                <textarea id="rewardDesc" rows="2" placeholder="奖励描述"></textarea>
+            </div>
+            <div class="form-group">
+                <label>所需积分</label>
+                <input type="number" id="rewardCost" value="50" min="1">
+            </div>
+            <div class="form-group">
+                <label>库存（-1=无限）</label>
+                <input type="number" id="rewardStock" value="-1" min="-1">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeRewardModal()">取消</button>
+                <button class="btn" onclick="saveReward()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" style="display:none"></div>
 
     <script src="js/api.js"></script>
     <script>
-        // 全局状态
-        let currentTab = 'tasks';
+        let currentPage = 'home';
         let isParent = false;
-        let currentModalType = 'task';
 
         // 页面加载
         document.addEventListener('DOMContentLoaded', () => {
@@ -452,43 +472,23 @@
             }
         });
 
-        // 显示登录页
         function showLogin() {
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
         }
 
-        // 显示应用
         function showApp() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'block';
-
             isParent = Api.isParent();
-            updateUserInfo();
-            loadData();
-
-            // 家长显示管理按钮
-            document.getElementById('addBtn').style.display = isParent ? 'block' : 'none';
-            document.getElementById('adminTab').style.display = isParent ? 'block' : 'none';
-
-            // 家长隐藏积分显示（积分是孩子的）
-            if (isParent) {
-                document.getElementById('pointsDisplay').style.display = 'none';
-            }
-        }
-
-        // 更新用户信息
-        function updateUserInfo() {
-            const user = Api.user;
-            document.getElementById('userInfo').textContent = `${user.username} · ${user.role === 'parent' ? '家长' : '孩子'}`;
-            document.getElementById('myPoints').textContent = user.points || 0;
+            document.getElementById('userInfo').textContent = Api.user.username + ' · ' + (isParent ? '家长' : '孩子');
+            loadPage();
         }
 
         // 切换登录标签
         function switchLoginTab(tab) {
             document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-
             document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
             document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
         }
@@ -497,522 +497,557 @@
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showToast('请填写邮箱和密码');
-                return;
-            }
-
+            if (!email || !password) { showToast('请填写邮箱和密码'); return; }
             try {
                 await Api.auth.login(email, password);
                 showApp();
                 showToast('登录成功');
-            } catch (e) {
-                showToast(e.message);
-            }
+            } catch (e) { showToast(e.message); }
         }
 
         // 注册
         async function handleRegister() {
-            const username = document.getElementById('regUsername').value.trim();
+            const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
-            const familyName = document.getElementById('regFamily').value.trim();
-
-            if (!username || !email || !password) {
-                showToast('请填写必填字段');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('密码至少6位');
-                return;
-            }
-
+            const family = document.getElementById('regFamily').value.trim();
+            if (!name || !email || !password) { showToast('请填写必填字段'); return; }
             try {
-                await Api.auth.register(email, password, username, familyName);
+                await Api.auth.register(email, password, name, family);
                 showApp();
                 showToast('注册成功');
-            } catch (e) {
-                showToast(e.message);
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 退出登录
+        function logout() {
+            Api.logout();
+            showLogin();
+        }
+
+        // 切换页面
+        function switchPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page + 'Page').classList.add('active');
+            loadPage();
+        }
+
+        // 加载页面
+        async function loadPage() {
+            // 显示/隐藏家长专属元素
+            document.getElementById('addTaskBtn').style.display = isParent ? 'block' : 'none';
+            document.getElementById('addRewardBtn').style.display = isParent ? 'block' : 'none';
+            document.getElementById('approveNav').style.display = isParent ? 'flex' : 'none';
+
+            switch (currentPage) {
+                case 'home': await loadHomePage(); break;
+                case 'tasks': await loadTasksPage(); break;
+                case 'shop': await loadShopPage(); break;
+                case 'approve': await loadApprovePage(); break;
+                case 'settings': await loadSettingsPage(); break;
             }
         }
 
-        // 加载数据
-        async function loadData() {
-            try {
-                // 孩子加载积分
-                if (!isParent) {
+        // 首页
+        async function loadHomePage() {
+            let html = '';
+
+            if (isParent) {
+                // 家长首页：孩子积分 + 待审批
+                html += '<div class="card"><div class="card-title">📊 家庭概览</div>';
+                try {
+                    const familyData = await Api.family.list();
+                    const children = (familyData.members || []).filter(m => m.role === 'child');
+                    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">';
+                    html += '<div class="stat-card"><div class="num">' + children.length + '</div><div class="label">孩子数量</div></div>';
+                    const pending = await Api.rewards.pendingApprovals();
+                    const pendingCount = (pending.pending || []).length;
+                    html += '<div class="stat-card"><div class="num" style="color:var(--danger)">' + pendingCount + '</div><div class="label">待审批</div></div>';
+                    html += '</div></div>';
+
+                    if (children.length > 0) {
+                        html += '<div class="section-title">孩子积分</div>';
+                        children.forEach(c => {
+                            html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">';
+                            html += '<div><div style="font-weight:600">' + c.username + '</div>';
+                            html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分余额</div></div>';
+                            html += '<div style="text-align:right"><div style="font-size:24px;color:var(--primary);font-weight:bold">' + c.points + '</div>';
+                            html += '<div style="font-size:12px;color:var(--text-light)">分</div></div></div></div>';
+                        });
+                    }
+                } catch (e) { html += '<p>加载失败</p></div>'; }
+            } else {
+                // 孩子首页：我的积分
+                try {
                     const pointsData = await Api.points.history();
-                    Api.user.points = pointsData.current_points;
-                    document.getElementById('myPoints').textContent = pointsData.current_points;
-                }
-
-                // 根据当前标签加载数据
-                if (currentTab === 'tasks') {
-                    loadTasks();
-                } else if (currentTab === 'rewards') {
-                    loadRewards();
-                } else if (currentTab === 'family') {
-                    loadFamily();
-                } else if (currentTab === 'admin') {
-                    loadAdmin();
-                }
-
-                // 加载待审批数量
-                if (isParent) {
-                    loadPendingCount();
-                }
-            } catch (e) {
-                console.error('Load data error:', e);
+                    html += '<div class="card points-big">';
+                    html += '<div class="label">我的积分</div>';
+                    html += '<div class="value">' + pointsData.current_points + '<span class="unit">分</span></div>';
+                    html += '</div>';
+                } catch (e) { html += '<div class="card"><p>加载失败</p></div>'; }
             }
-        }
 
-        // 加载管理面板
-        async function loadAdmin() {
-            await loadPendingRedemptions();
-            await loadChildren();
-        }
-
-        // 加载待审批兑换
-        async function loadPendingRedemptions() {
+            // 积分排行
+            html += '<div class="section-title">🏆 积分排行</div>';
+            html += '<div class="card">';
             try {
-                const data = await Api.rewards.pendingApprovals();
-                const pending = data.pending || [];
-
-                let html = '<div class="section-title">待审批兑换</div>';
-                if (pending.length === 0) {
-                    html += '<p style="color:var(--text-light);text-align:center;padding:20px">暂无待审批的兑换</p>';
+                const rankData = await Api.points.ranking();
+                const ranking = rankData.ranking || [];
+                if (ranking.length === 0) {
+                    html += '<p class="empty">暂无排行数据</p>';
                 } else {
-                    pending.forEach(item => {
-                        html += `
-                            <div class="card">
-                                <div class="card-header">
-                                    <span class="card-title">${item.username}</span>
-                                    <span class="task-points">${item.points_spent}分</span>
-                                </div>
-                                <div class="card-meta">兑换: ${item.reward_title}</div>
-                                <div style="display:flex;gap:8px;margin-top:10px">
-                                    <button class="btn btn-sm btn-success" onclick="approveRedemption(${item.id})">通过</button>
-                                    <button class="btn btn-sm btn-danger" onclick="rejectRedemption(${item.id})">拒绝</button>
-                                </div>
-                            </div>
-                        `;
+                    ranking.forEach((item, i) => {
+                        const medal = ['', '🥇', '🥈', '🥉'][i] || (i + 1);
+                        html += '<div class="list-item">';
+                        html += '<div><span style="margin-right:8px">' + medal + '</span>' + item.username + '</div>';
+                        html += '<div style="color:var(--primary);font-weight:600">' + item.points + '分</div>';
+                        html += '</div>';
                     });
                 }
-                document.getElementById('pendingRedemptions').innerHTML = html;
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { html += '<p>加载失败</p>'; }
+            html += '</div>';
+
+            document.getElementById('homeContent').innerHTML = html;
         }
 
-        // 加载孩子列表
-        async function loadChildren() {
-            try {
-                const data = await Api.family.list();
-                const members = (data.members || []).filter(m => m.role === 'child');
-
-                let html = '';
-                if (members.length === 0) {
-                    html = '<p style="color:var(--text-light);text-align:center;padding:20px">暂无孩子账号</p>';
-                } else {
-                    members.forEach(child => {
-                        html += `
-                            <div class="card">
-                                <div class="card-header">
-                                    <span class="card-title">${child.username}</span>
-                                    <span class="task-points">${child.points}分</span>
-                                </div>
-                                <div style="display:flex;gap:8px;margin-top:10px">
-                                    <button class="btn btn-sm btn-success" onclick="adjustPoints(${child.id}, '${child.username}', 10, 'bonus')">+10</button>
-                                    <button class="btn btn-sm btn-success" onclick="adjustPoints(${child.id}, '${child.username}', 50, 'bonus')">+50</button>
-                                    <button class="btn btn-sm btn-danger" onclick="adjustPoints(${child.id}, '${child.username}', 10, 'deduct')">-10</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById('childrenList').innerHTML = html;
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        // 创建孩子账号
-        async function createChild() {
-            const username = document.getElementById('childUsername').value.trim();
-            const password = document.getElementById('childPassword').value;
-
-            if (!username || !password) {
-                showToast('请填写用户名和密码');
-                return;
-            }
-
-            try {
-                await Api.auth.createChild(username, password);
-                showToast('孩子账号创建成功');
-                document.getElementById('childUsername').value = '';
-                document.getElementById('childPassword').value = '';
-                loadChildren();
-                loadFamily();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        // 调整积分
-        async function adjustPoints(userId, username, amount, type) {
-            try {
-                await Api.points.adjust(userId, amount, type, type === 'bonus' ? '家长奖励' : '家长扣分');
-                showToast(`${username} ${type === 'bonus' ? '+' : '-'}${amount}积分`);
-                loadChildren();
-                loadFamily();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        // 审批兑换
-        async function approveRedemption(id) {
-            try {
-                await Api.rewards.approve(id, 'approve');
-                showToast('兑换已通过');
-                loadPendingRedemptions();
-                loadPendingCount();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        async function rejectRedemption(id) {
-            try {
-                await Api.rewards.approve(id, 'reject');
-                showToast('兑换已拒绝');
-                loadPendingRedemptions();
-                loadPendingCount();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        // 加载任务
-        async function loadTasks() {
+        // 任务页
+        async function loadTasksPage() {
+            let html = '';
             try {
                 const data = await Api.tasks.list();
                 const tasks = data.tasks || [];
 
                 if (tasks.length === 0) {
-                    document.getElementById('tasksList').innerHTML = `
-                        <div class="empty-state">
-                            <div class="icon">📋</div>
-                            <p>暂无任务</p>
-                            ${isParent ? '<button class="btn btn-sm" onclick="showAddModal(\'task\')">添加任务</button>' : ''}
-                        </div>
-                    `;
-                    return;
+                    html = '<div class="empty"><div class="icon">📋</div><p>暂无任务</p>';
+                    if (isParent) html += '<button class="btn btn-sm" onclick="showAddTask()">添加任务</button>';
+                    html += '</div>';
+                } else {
+                    tasks.forEach(task => {
+                        html += '<div class="card">';
+                        html += '<div style="display:flex;justify-content:space-between;align-items:start">';
+                        html += '<div style="flex:1"><div class="card-title">' + task.title + '</div>';
+                        if (task.description) html += '<div class="card-meta">' + task.description + '</div>';
+                        html += '<div class="card-meta">' + getRepeatText(task.repeat_type) + '</div></div>';
+                        html += '<span class="tag">+' + task.points + '</span></div>';
+
+                        if (isParent) {
+                            html += '<div style="margin-top:12px;display:flex;gap:8px">';
+                            html += '<button class="btn btn-sm btn-outline" onclick="editTask(' + task.id + ',\'' + task.title + '\',\'' + (task.description || '') + '\',' + task.points + ',\'' + task.repeat_type + '\')">编辑</button>';
+                            html += '<button class="btn btn-sm btn-danger" onclick="deleteTask(' + task.id + ')">删除</button>';
+                            html += '</div>';
+                        } else {
+                            const canComplete = task.can_complete;
+                            html += '<button class="btn btn-sm ' + (canComplete ? 'btn-success' : 'btn-outline') + '" style="margin-top:12px" onclick="completeTask(' + task.id + ')" ' + (canComplete ? '' : 'disabled') + '>';
+                            html += canComplete ? '完成' : '已完成';
+                            html += '</button>';
+                        }
+                        html += '</div>';
+                    });
                 }
+            } catch (e) { html = '<div class="card"><p>加载失败</p></div>'; }
 
-                document.getElementById('tasksList').innerHTML = tasks.map(task => `
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">${task.title}</span>
-                            <span class="task-points">+${task.points}</span>
-                        </div>
-                        ${task.description ? `<div class="card-meta">${task.description}</div>` : ''}
-                        <div class="card-meta">${getRepeatLabel(task.repeat_type)}</div>
-                        ${!isParent ? `
-                            <button class="btn btn-sm ${task.can_complete ? '' : 'btn-outline'}"
-                                    onclick="completeTask(${task.id})"
-                                    ${task.can_complete ? '' : 'disabled'}>
-                                ${task.can_complete ? '完成' : '已完成'}
-                            </button>
-                        ` : `
-                            <button class="btn btn-sm btn-outline" onclick="deleteTask(${task.id})">删除</button>
-                        `}
-                    </div>
-                `).join('');
-            } catch (e) {
-                showToast('加载任务失败');
-            }
+            document.getElementById('tasksContent').innerHTML = html;
         }
 
-        // 完成任务的简化版本
-        async function completeTask(taskId) {
-            try {
-                const result = await Api.tasks.complete(taskId);
-                Api.user.points = result.new_balance;
-                updateUserInfo();
-                showToast(result.message);
-                loadTasks();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        // 删除任务
-        async function deleteTask(taskId) {
-            if (!confirm('确定删除此任务？')) return;
-            try {
-                await Api.tasks.delete(taskId);
-                showToast('任务已删除');
-                loadTasks();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        // 加载奖励
-        async function loadRewards() {
+        // 商城页
+        async function loadShopPage() {
+            let html = '';
             try {
                 const data = await Api.rewards.list();
                 const rewards = data.rewards || [];
                 const myRedemptions = data.my_redemptions || [];
 
-                // 奖励列表
                 if (rewards.length === 0) {
-                    document.getElementById('rewardsList').innerHTML = `
-                        <div class="empty-state">
-                            <div class="icon">🎁</div>
-                            <p>暂无奖励</p>
-                        </div>
-                    `;
+                    html = '<div class="empty"><div class="icon">🎁</div><p>暂无奖励</p></div>';
                 } else {
-                    document.getElementById('rewardsList').innerHTML = rewards.map(reward => `
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">${reward.title}</span>
-                                <span class="task-points">${reward.points_cost}分</span>
-                            </div>
-                            ${reward.description ? `<div class="card-meta">${reward.description}</div>` : ''}
-                            ${!isParent ? `
-                                <button class="btn btn-sm btn-outline" onclick="redeemReward(${reward.id})">兑换</button>
-                            ` : ''}
-                        </div>
-                    `).join('');
+                    html += '<div class="section-title">可兑换奖励</div>';
+                    rewards.forEach(r => {
+                        html += '<div class="card">';
+                        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+                        html += '<div style="flex:1"><div class="card-title">' + r.title + '</div>';
+                        if (r.description) html += '<div class="card-meta">' + r.description + '</div>';
+                        html += '<div class="card-meta">库存: ' + (r.stock === -1 ? '无限' : r.stock) + '</div></div>';
+                        html += '<span class="tag">' + r.points_cost + '分</span></div>';
+
+                        if (!isParent) {
+                            html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="redeemReward(' + r.id + ')">申请兑换</button>';
+                        }
+                        html += '</div>';
+                    });
                 }
 
                 // 我的兑换记录
                 if (myRedemptions.length > 0) {
-                    document.getElementById('myRedemptions').innerHTML = myRedemptions.map(r => `
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">${r.reward_title}</span>
-                                <span class="card-badge">${getStatusLabel(r.status)}</span>
-                            </div>
-                            <div class="card-meta">消耗 ${r.points_spent} 积分 · ${formatDate(r.created_at)}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    document.getElementById('myRedemptions').innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">暂无兑换记录</p>';
-                }
-            } catch (e) {
-                showToast('加载奖励失败');
-            }
-        }
-
-        // 兑换奖励
-        async function redeemReward(rewardId) {
-            try {
-                const result = await Api.rewards.redeem(rewardId);
-                showToast(result.message);
-                loadRewards();
-            } catch (e) {
-                showToast(e.message);
-            }
-        }
-
-        // 加载家庭资料
-        async function loadFamily() {
-            try {
-                const data = await Api.family.list();
-                const family = data.family;
-                const members = data.members || [];
-                const info = data.info || [];
-
-                let html = `
-                    <div class="card">
-                        <div class="card-title">${family?.name || '我的家庭'}</div>
-                        ${family?.invite_code ? `<div class="card-meta">邀请码：${family.invite_code}</div>` : ''}
-                    </div>
-                    <div class="section-title">家庭成员</div>
-                `;
-
-                members.forEach(m => {
-                    html += `
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">${m.username}</span>
-                                <span class="card-badge">${m.role === 'parent' ? '家长' : '孩子'}</span>
-                            </div>
-                            <div class="card-meta">${m.points} 积分</div>
-                            ${isParent && m.role === 'child' ? `
-                                <button class="btn btn-sm" onclick="showAdjustModal(${m.id}, '${m.username}')">调整积分</button>
-                            ` : ''}
-                        </div>
-                    `;
-                });
-
-                if (info.length > 0) {
-                    html += '<div class="section-title">重要日期</div>';
-                    info.filter(i => i.category === 'birthday').forEach(item => {
-                        html += `
-                            <div class="card">
-                                <div class="card-title">🎂 ${item.title}</div>
-                                <div class="card-meta">${item.content}</div>
-                                ${item.days_until !== undefined ? `<div class="card-meta">还有 ${item.days_until} 天</div>` : ''}
-                            </div>
-                        `;
+                    html += '<div class="section-title">我的兑换记录</div>';
+                    myRedemptions.forEach(r => {
+                        const statusClass = { pending: 'tag-pending', approved: 'tag-success', rejected: 'tag-danger' }[r.status] || '';
+                        const statusText = { pending: '待审批', approved: '已通过', rejected: '已拒绝' }[r.status] || r.status;
+                        html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                        html += '<div><div>' + r.reward_title + '</div><div class="card-meta">' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
+                        html += '<span class="tag ' + statusClass + '">' + statusText + '</span>';
+                        html += '</div></div>';
                     });
                 }
+            } catch (e) { html = '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
 
-                document.getElementById('familyInfo').innerHTML = html;
-            } catch (e) {
-                showToast('加载家庭信息失败');
-            }
+            document.getElementById('shopContent').innerHTML = html;
         }
 
-        // 加载排行榜
-        async function loadRanking() {
-            try {
-                const data = await Api.points.ranking();
-                const ranking = data.ranking || [];
+        // 审批页（家长）
+        async function loadApprovePage() {
+            if (!isParent) return;
 
-                if (ranking.length === 0) {
-                    document.getElementById('rankingList').innerHTML = '<p style="color: var(--text-light); text-align: center;">暂无排行数据</p>';
-                    return;
-                }
-
-                document.getElementById('rankingList').innerHTML = ranking.map((item, index) => `
-                    <div class="rank-item">
-                        <div class="rank-num ${index < 3 ? 'top' : ''}">${index + 1}</div>
-                        <div class="rank-name">${item.username} ${item.role === 'parent' ? '(家长)' : ''}</div>
-                        <div class="rank-points">${item.points}分</div>
-                    </div>
-                `).join('');
-            } catch (e) {
-                showToast('加载排行失败');
-            }
-        }
-
-        // 加载待审批数量
-        async function loadPendingCount() {
+            let html = '';
             try {
                 const data = await Api.rewards.pendingApprovals();
-                const count = data.pending?.length || 0;
-                const badge = document.getElementById('pendingBadge');
+                const pending = data.pending || [];
+
+                if (pending.length === 0) {
+                    html = '<div class="empty"><div class="icon">📮</div><p>暂无待审批的兑换</p></div>';
+                } else {
+                    pending.forEach(p => {
+                        html += '<div class="card">';
+                        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+                        html += '<div><div class="card-title">' + p.username + '</div>';
+                        html += '<div class="card-meta">申请兑换: ' + p.reward_title + '</div>';
+                        html += '<div class="card-meta">' + p.points_spent + '积分 · ' + formatDate(p.created_at) + '</div></div>';
+                        html += '<span class="tag tag-pending">待审批</span></div>';
+                        html += '<div style="display:flex;gap:8px;margin-top:12px">';
+                        html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="handleApprove(' + p.id + ', true)">通过</button>';
+                        html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="handleApprove(' + p.id + ', false)">拒绝</button>';
+                        html += '</div></div>';
+                    });
+                }
+            } catch (e) { html = '<div class="card"><p>加载失败</p></div>'; }
+
+            document.getElementById('approveContent').innerHTML = html;
+
+            // 更新角标
+            try {
+                const data = await Api.rewards.pendingApprovals();
+                const count = (data.pending || []).length;
+                const badge = document.getElementById('approveBadge');
                 if (count > 0) {
                     badge.textContent = count;
                     badge.style.display = 'flex';
                 } else {
                     badge.style.display = 'none';
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) {}
         }
 
-        // 切换标签
-        function switchTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab).classList.add('active');
+        // 我的页面
+        async function loadSettingsPage() {
+            let html = '';
 
-            loadData();
-        }
-
-        // 显示添加模态框
-        function showAddModal(type) {
-            currentModalType = type || 'task';
-            const modal = document.getElementById('addModal');
-            modal.classList.add('show');
-
-            document.getElementById('modalTitle').textContent = currentModalType === 'task' ? '添加任务' : '添加奖励';
-            document.getElementById('taskForm').style.display = currentModalType === 'task' ? 'block' : 'none';
-            document.getElementById('rewardForm').style.display = currentModalType === 'reward' ? 'block' : 'none';
-        }
-
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('addModal').classList.remove('show');
-        }
-
-        // 保存添加
-        async function saveAdd() {
-            if (currentModalType === 'task') {
-                const title = document.getElementById('taskTitle').value.trim();
-                const description = document.getElementById('taskDesc').value.trim();
-                const points = parseInt(document.getElementById('taskPoints').value) || 10;
-                const repeat = document.getElementById('taskRepeat').value;
-
-                if (!title) {
-                    showToast('请输入任务名称');
-                    return;
-                }
+            if (isParent) {
+                // 家长：孩子管理 + 家庭资料
+                html += '<div class="section-title">👨‍👩‍👧 孩子管理</div>';
+                html += '<div class="card">';
+                html += '<div class="form-group"><label>创建孩子账号</label><input type="text" id="childName" placeholder="孩子用户名"></div>';
+                html += '<div class="form-group"><input type="password" id="childPass" placeholder="密码"></div>';
+                html += '<button class="btn btn-sm" onclick="createChild()">创建</button>';
+                html += '</div>';
 
                 try {
-                    await Api.tasks.create({ title, description, points, repeat_type: repeat });
-                    showToast('任务创建成功');
-                    closeModal();
-                    loadTasks();
-                } catch (e) {
-                    showToast(e.message);
-                }
+                    const familyData = await Api.family.list();
+                    const children = (familyData.members || []).filter(m => m.role === 'child');
+                    children.forEach(c => {
+                        html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                        html += '<div><div style="font-weight:600">' + c.username + '</div>';
+                        html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分: ' + c.points + '</div></div>';
+                        html += '<div style="display:flex;gap:4px">';
+                        html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 10)">+10</button>';
+                        html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 50)">+50</button>';
+                        html += '<button class="btn btn-sm btn-danger" onclick="adjustPoints(' + c.id + ', -10)">-10</button>';
+                        html += '</div></div></div>';
+                    });
+                } catch (e) {}
+
+                // 家庭资料
+                html += '<div class="section-title">📅 生日管理</div>';
+                html += '<div class="card">';
+                html += '<div class="form-group"><label>添加生日</label><input type="text" id="birthdayName" placeholder="成员名称"></div>';
+                html += '<div class="form-group"><input type="date" id="birthdayDate"></div>';
+                html += '<button class="btn btn-sm" onclick="addBirthday()">添加</button>';
+                html += '</div>';
+                html += '<div id="birthdayList"></div>';
+
+                html += '<div class="section-title">📁 证件管理</div>';
+                html += '<div class="card">';
+                html += '<div class="form-group"><label>添加证件</label><input type="text" id="docName" placeholder="证件名称"></div>';
+                html += '<div class="form-group"><input type="text" id="docInfo" placeholder="证件信息"></div>';
+                html += '<button class="btn btn-sm" onclick="addDocument()">添加</button>';
+                html += '</div>';
+                html += '<div id="documentList"></div>';
+
+                // 加载生日和证件
+                loadFamilyInfo();
             } else {
-                const title = document.getElementById('rewardTitle').value.trim();
-                const description = document.getElementById('rewardDesc').value.trim();
-                const pointsCost = parseInt(document.getElementById('rewardCost').value) || 50;
-
-                if (!title) {
-                    showToast('请输入奖励名称');
-                    return;
-                }
-
+                // 孩子：积分历史 + 家庭生日
+                html += '<div class="section-title">💰 积分明细</div>';
+                html += '<div class="card">';
                 try {
-                    await Api.rewards.create({ title, description, points_cost: pointsCost });
-                    showToast('奖励添加成功');
-                    closeModal();
-                    loadRewards();
-                } catch (e) {
-                    showToast(e.message);
-                }
+                    const data = await Api.points.history();
+                    const history = data.history || [];
+                    if (history.length === 0) {
+                        html += '<p style="text-align:center;color:var(--text-light)">暂无积分记录</p>';
+                    } else {
+                        history.forEach(h => {
+                            const sign = h.amount > 0 ? '+' : '';
+                            const color = h.amount > 0 ? 'var(--success)' : 'var(--danger)';
+                            html += '<div class="list-item" style="padding:10px 0">';
+                            html += '<div><div>' + (h.note || getTypeText(h.type)) + '</div>';
+                            html += '<div style="font-size:12px;color:var(--text-light)">' + formatDate(h.created_at) + '</div></div>';
+                            html += '<div style="color:' + color + ';font-weight:600">' + sign + h.amount + '</div>';
+                            html += '</div>';
+                        });
+                    }
+                } catch (e) { html += '<p>加载失败</p>'; }
+                html += '</div>';
+
+                html += '<div class="section-title">🎂 家庭生日</div>';
+                html += '<div id="birthdayList"></div>';
+                loadFamilyInfo();
             }
+
+            document.getElementById('settingsContent').innerHTML = html;
         }
 
-        // 显示 Toast
-        function showToast(message) {
+        // 加载家庭信息
+        async function loadFamilyInfo() {
+            try {
+                const data = await Api.family.list();
+                const info = data.info || [];
+
+                // 生日
+                const birthdays = info.filter(i => i.category === 'birthday');
+                let bHtml = '';
+                birthdays.forEach(b => {
+                    const days = b.days_until !== undefined ? b.days_until : '?';
+                    bHtml += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                    bHtml += '<div><div style="font-weight:600">🎂 ' + b.title + '</div>';
+                    bHtml += '<div style="font-size:13px;color:var(--text-light)">' + b.content + '</div></div>';
+                    if (!isParent) {
+                        bHtml += '<div style="color:var(--primary);font-weight:600">' + days + '天后</div>';
+                    }
+                    if (isParent) {
+                        bHtml += '<button class="btn btn-sm btn-danger" onclick="deleteFamilyInfo(' + b.id + ')">删除</button>';
+                    }
+                    bHtml += '</div></div>';
+                });
+                document.getElementById('birthdayList').innerHTML = bHtml;
+
+                // 证件
+                const docs = info.filter(i => i.category === 'document');
+                let dHtml = '';
+                docs.forEach(d => {
+                    dHtml += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                    dHtml += '<div><div style="font-weight:600">📄 ' + d.title + '</div>';
+                    dHtml += '<div style="font-size:13px;color:var(--text-light)">' + d.content + '</div></div>';
+                    if (isParent) {
+                        dHtml += '<button class="btn btn-sm btn-danger" onclick="deleteFamilyInfo(' + d.id + ')">删除</button>';
+                    }
+                    dHtml += '</div></div>';
+                });
+                document.getElementById('documentList').innerHTML = dHtml;
+            } catch (e) { console.error(e); }
+        }
+
+        // 任务操作
+        function showAddTask() {
+            document.getElementById('taskModalTitle').textContent = '添加任务';
+            document.getElementById('editTaskId').value = '';
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskPoints').value = '10';
+            document.getElementById('taskRepeat').value = 'once';
+            document.getElementById('taskModal').classList.add('show');
+        }
+
+        function editTask(id, title, desc, points, repeat) {
+            document.getElementById('taskModalTitle').textContent = '编辑任务';
+            document.getElementById('editTaskId').value = id;
+            document.getElementById('taskName').value = title;
+            document.getElementById('taskDesc').value = desc;
+            document.getElementById('taskPoints').value = points;
+            document.getElementById('taskRepeat').value = repeat;
+            document.getElementById('taskModal').classList.add('show');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('show');
+        }
+
+        async function saveTask() {
+            const id = document.getElementById('editTaskId').value;
+            const data = {
+                title: document.getElementById('taskName').value.trim(),
+                description: document.getElementById('taskDesc').value.trim(),
+                points: parseInt(document.getElementById('taskPoints').value) || 10,
+                repeat_type: document.getElementById('taskRepeat').value
+            };
+            if (!data.title) { showToast('请输入任务名称'); return; }
+            try {
+                if (id) {
+                    data.id = id;
+                    await Api.tasks.update(data);
+                    showToast('任务已更新');
+                } else {
+                    await Api.tasks.create(data);
+                    showToast('任务已创建');
+                }
+                closeTaskModal();
+                loadTasksPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        async function completeTask(id) {
+            try {
+                const result = await Api.tasks.complete(id);
+                showToast('获得 ' + result.points_earned + ' 积分！');
+                loadPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('确定删除？')) return;
+            try {
+                await Api.tasks.delete(id);
+                showToast('已删除');
+                loadTasksPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 奖励操作
+        function showAddReward() {
+            document.getElementById('rewardName').value = '';
+            document.getElementById('rewardDesc').value = '';
+            document.getElementById('rewardCost').value = '50';
+            document.getElementById('rewardStock').value = '-1';
+            document.getElementById('rewardModal').classList.add('show');
+        }
+
+        function closeRewardModal() {
+            document.getElementById('rewardModal').classList.remove('show');
+        }
+
+        async function saveReward() {
+            const data = {
+                title: document.getElementById('rewardName').value.trim(),
+                description: document.getElementById('rewardDesc').value.trim(),
+                points_cost: parseInt(document.getElementById('rewardCost').value) || 50,
+                stock: parseInt(document.getElementById('rewardStock').value) || -1
+            };
+            if (!data.title) { showToast('请输入奖励名称'); return; }
+            try {
+                await Api.rewards.create(data);
+                showToast('奖励已创建');
+                closeRewardModal();
+                loadShopPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        async function redeemReward(id) {
+            try {
+                await Api.rewards.redeem(id);
+                showToast('兑换申请已提交');
+                loadShopPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 审批操作
+        async function handleApprove(id, approve) {
+            try {
+                await Api.rewards.approve(id, approve ? 'approve' : 'reject');
+                showToast(approve ? '已通过' : '已拒绝');
+                loadApprovePage();
+                loadPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 孩子管理
+        async function createChild() {
+            const name = document.getElementById('childName').value.trim();
+            const pass = document.getElementById('childPass').value;
+            if (!name || !pass) { showToast('请填写用户名和密码'); return; }
+            try {
+                await Api.auth.createChild(name, pass);
+                showToast('孩子账号已创建');
+                document.getElementById('childName').value = '';
+                document.getElementById('childPass').value = '';
+                loadSettingsPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        async function adjustPoints(userId, amount) {
+            const type = amount > 0 ? 'bonus' : 'deduct';
+            try {
+                await Api.points.adjust(Math.abs(userId), Math.abs(amount), type, type === 'bonus' ? '家长奖励' : '家长扣分');
+                showToast((amount > 0 ? '+' : '') + amount + '积分');
+                loadSettingsPage();
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 家庭资料
+        async function addBirthday() {
+            const name = document.getElementById('birthdayName').value.trim();
+            const date = document.getElementById('birthdayDate').value;
+            if (!name || !date) { showToast('请填写名称和日期'); return; }
+            try {
+                await Api.family.create({ category: 'birthday', title: name, content: date });
+                showToast('生日已添加');
+                document.getElementById('birthdayName').value = '';
+                document.getElementById('birthdayDate').value = '';
+                loadFamilyInfo();
+            } catch (e) { showToast(e.message); }
+        }
+
+        async function addDocument() {
+            const name = document.getElementById('docName').value.trim();
+            const info = document.getElementById('docInfo').value.trim();
+            if (!name || !info) { showToast('请填写证件名称和信息'); return; }
+            try {
+                await Api.family.create({ category: 'document', title: name, content: info });
+                showToast('证件已添加');
+                document.getElementById('docName').value = '';
+                document.getElementById('docInfo').value = '';
+                loadFamilyInfo();
+            } catch (e) { showToast(e.message); }
+        }
+
+        async function deleteFamilyInfo(id) {
+            if (!confirm('确定删除？')) return;
+            try {
+                await Api.family.delete(id);
+                showToast('已删除');
+                loadFamilyInfo();
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 工具函数
+        function showToast(msg) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.textContent = msg;
             toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
+            setTimeout(() => toast.style.display = 'none', 3000);
         }
 
-        // 辅助函数
-        function getRepeatLabel(type) {
-            const labels = { once: '一次性', daily: '每日', weekly: '每周' };
-            return labels[type] || type;
+        function getRepeatText(type) {
+            return { once: '一次性', daily: '每日', weekly: '每周' }[type] || type;
         }
 
-        function getStatusLabel(status) {
-            const labels = { pending: '待审批', approved: '已通过', rejected: '已拒绝', completed: '已完成' };
-            return labels[status] || status;
+        function getTypeText(type) {
+            return { earn: '完成任务', redeem: '兑换奖励', bonus: '获得奖励', deduct: '扣除积分' }[type] || type;
         }
 
-        function logout() {
-            Api.logout();
-            document.getElementById('appPage').style.display = 'none';
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('adminTab').style.display = 'none';
-            document.getElementById('pointsDisplay').style.display = 'block';
-            document.getElementById('addBtn').style.display = 'none';
-        }
-
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        function formatDate(str) {
+            if (!str) return '';
+            const d = new Date(str);
+            return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
         }
     </script>
 </body>

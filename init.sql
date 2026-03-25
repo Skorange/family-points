@@ -1,5 +1,7 @@
 -- 家庭积分星球 数据库初始化
 -- 创建日期: 2026-03-25
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS users (

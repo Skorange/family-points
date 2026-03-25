@@ -178,13 +178,13 @@ const Api = {
             });
         },
 
-        async approve(redemptionId, action = 'approve') {
+        async approve(redemptionId, approvalAction = 'approve') {
             return Api.request('points.php', {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'approve_redemption',
                     redemption_id: redemptionId,
-                    action
+                    approval_action: approvalAction
                 })
             });
         },

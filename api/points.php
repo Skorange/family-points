@@ -213,9 +213,14 @@ function redeemReward($db, $user, $input) {
         jsonResponse(['error' => '该奖励已兑换完'], 400);
     }
 
+    // 获取用户当前积分（JWT中不含points，需从DB获取）
+    $stmt = $db->prepare('SELECT points FROM users WHERE id = ?');
+    $stmt->execute([$user['id']]);
+    $userPoints = $stmt->fetch()['points'] ?? 0;
+
     // 检查积分是否足够
-    if ($user['points'] < $reward['points_cost']) {
-        jsonResponse(['error' => '积分不足'], 400);
+    if ($userPoints < $reward['points_cost']) {
+        jsonResponse(['error' => '积分不足（当前：' . $userPoints . '）'], 400);
     }
 
     // 创建兑换申请
@@ -240,7 +245,7 @@ function approveRedemption($db, $user, $input) {
     }
 
     $redemptionId = intval($input['redemption_id'] ?? 0);
-    $action = $input['action'] ?? 'approve'; // approve 或 reject
+    $action = $input['approval_action'] ?? 'approve'; // approve 或 reject
 
     if ($redemptionId <= 0) {
         jsonResponse(['error' => '无效的兑换ID'], 400);
@@ -284,7 +289,7 @@ function approveRedemption($db, $user, $input) {
 
         // 更新兑换状态
         $stmt = $db->prepare('UPDATE redemptions SET status = ?, approved_by = ?, completed_at = NOW() WHERE id = ?');
-        $stmt->execute([$redemptionId, $user['id'], 'approved']);
+        $stmt->execute(['approved', $user['id'], $redemptionId]);
 
         jsonResponse([
             'message' => '兑换已审批通过',
