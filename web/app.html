@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>家庭积分星球</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-light: #FF8E53;
+            --bg: #f5f5f5;
+            --card: white;
+            --text: #333;
+            --text-light: #888;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 20px; margin-bottom: 4px; }
+        .header .user { font-size: 14px; opacity: 0.9; }
+        .points-display {
+            background: white;
+            margin: 16px;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .points-display .label { color: var(--text-light); font-size: 14px; }
+        .points-display .value { font-size: 48px; color: var(--primary); font-weight: bold; }
+        .points-display .unit { font-size: 18px; color: var(--primary-light); }
+        .tabs {
+            display: flex;
+            background: white;
+            padding: 0 8px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .tab {
+            flex: 1;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .content { padding: 16px; }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .card-title { font-weight: 600; margin-bottom: 8px; }
+        .card-meta { font-size: 12px; color: var(--text-light); }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .task-points {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .rank-list { padding: 8px 0; }
+        .rank-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .rank-item:last-child { border-bottom: none; }
+        .rank-num {
+            width: 24px;
+            height: 24px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-right: 12px;
+        }
+        .rank-num.top { background: var(--primary); color: white; }
+        .rank-name { flex: 1; }
+        .rank-points { color: var(--primary); font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .login-form { padding: 40px 20px; text-align: center; }
+        .login-form input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页 -->
+    <div id="loginPage" class="login-form">
+        <h2 style="margin-bottom: 30px;">🎃 家庭积分星球</h2>
+        <input type="email" id="email" placeholder="邮箱" value="admin@skorange.com">
+        <input type="password" id="password" placeholder="密码" value="123456">
+        <button class="btn" style="width: 100%; margin-top: 10px;" onclick="login()">登录</button>
+        <p style="margin-top: 20px; font-size: 14px; color: var(--text-light);">
+            演示模式 - 数据存储在本地
+        </p>
+    </div>
+
+    <!-- 主应用 -->
+    <div id="appPage" style="display: none;">
+        <div class="header">
+            <h1>🎃 家庭积分星球</h1>
+            <div class="user" id="userInfo">家长 · 1000 积分</div>
+        </div>
+
+        <div class="points-display">
+            <div class="label">我的积分</div>
+            <div class="value"><span id="myPoints">1000</span> <span class="unit">分</span></div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('tasks')">📋 任务</div>
+            <div class="tab" onclick="switchTab('rewards')">🎁 奖励</div>
+            <div class="tab" onclick="switchTab('family')">👨‍👩‍👧 家庭</div>
+            <div class="tab" onclick="switchTab('rank')">🏆 排行</div>
+        </div>
+
+        <div class="content">
+            <!-- 任务列表 -->
+            <div id="tasks" class="tab-content active">
+                <div class="card">
+                    <div class="card-title">🧹 做家务</div>
+                    <div class="card-meta">每日任务 · +10 积分</div>
+                    <button class="btn" style="margin-top: 10px;" onclick="completeTask(this)">完成</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">📚 写作业</div>
+                    <div class="card-meta">每日任务 · +20 积分</div>
+                    <button class="btn" style="margin-top: 10px;" onclick="completeTask(this)">完成</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">🏃 运动30分钟</div>
+                    <div class="card-meta">每日任务 · +15 积分</div>
+                    <button class="btn" style="margin-top: 10px;" onclick="completeTask(this)">完成</button>
+                </div>
+            </div>
+
+            <!-- 奖励商城 -->
+            <div id="rewards" class="tab-content">
+                <div class="card">
+                    <div class="card-title">🎮 游戏时间 30分钟</div>
+                    <div class="card-meta">库存充足</div>
+                    <div class="task-points" style="margin: 10px 0;">需要 50 积分</div>
+                    <button class="btn btn-outline" onclick="redeem(this, 50)">兑换</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">🍦 冰淇淋</div>
+                    <div class="card-meta">库存充足</div>
+                    <div class="task-points" style="margin: 10px 0;">需要 30 积分</div>
+                    <button class="btn btn-outline" onclick="redeem(this, 30)">兑换</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">🎬 看电影</div>
+                    <div class="card-meta">库存充足</div>
+                    <div class="task-points" style="margin: 10px 0;">需要 100 积分</div>
+                    <button class="btn btn-outline" onclick="redeem(this, 100)">兑换</button>
+                </div>
+            </div>
+
+            <!-- 家庭资料 -->
+            <div id="family" class="tab-content">
+                <div class="card">
+                    <div class="card-title">🎂 生日提醒</div>
+                    <div class="card-meta">爸爸: 5月20日 (58天后)</div>
+                    <div class="card-meta">妈妈: 8月15日 (143天后)</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📁 重要证件</div>
+                    <div class="card-meta">身份证: 有效期至2035年</div>
+                    <div class="card-meta">护照: 有效期至2028年</div>
+                </div>
+            </div>
+
+            <!-- 排行榜 -->
+            <div id="rank" class="tab-content">
+                <div class="card rank-list">
+                    <div class="rank-item">
+                        <div class="rank-num top">1</div>
+                        <div class="rank-name">小明</div>
+                        <div class="rank-points">2500分</div>
+                    </div>
+                    <div class="rank-item">
+                        <div class="rank-num top">2</div>
+                        <div class="rank-name">小红</div>
+                        <div class="rank-points">1800分</div>
+                    </div>
+                    <div class="rank-item">
+                        <div class="rank-num">3</div>
+                        <div class="rank-name">小华</div>
+                        <div class="rank-points">1200分</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let points = parseInt(localStorage.getItem('points')) || 1000;
+
+        function login() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appPage').style.display = 'block';
+            updatePoints();
+        }
+
+        function updatePoints() {
+            document.getElementById('myPoints').textContent = points;
+            document.getElementById('userInfo').textContent = '家长 · ' + points + ' 积分';
+            localStorage.setItem('points', points);
+        }
+
+        function completeTask(btn) {
+            const card = btn.closest('.card');
+            const match = card.querySelector('.card-meta').textContent.match(/\+(\d+)/);
+            if (match) {
+                const earned = parseInt(match[1]);
+                points += earned;
+                updatePoints();
+                btn.textContent = '✓ 已完成';
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                setTimeout(() => {
+                    btn.textContent = '完成';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }, 2000);
+            }
+        }
+
+        function redeem(btn, cost) {
+            if (points >= cost) {
+                points -= cost;
+                updatePoints();
+                btn.textContent = '✓ 已申请';
+                btn.disabled = true;
+                alert('兑换申请已提交，等待家长审批！');
+                btn.textContent = '兑换';
+                btn.disabled = false;
+            } else {
+                alert('积分不足！需要 ' + cost + ' 分，你只有 ' + points + ' 分');
+            }
+        }
+
+        function switchTab(name) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(name).classList.add('active');
+        }
+    </script>
+</body>
+</html>

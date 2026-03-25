@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    container_name: family-points
+    ports:
+      - "8081:80"
+    volumes:
+      - ./web:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - family-network
+
+  db:
+    image: mysql:8.0
+    container_name: family-points-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: family_points
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - family-network
+
+  webhook:
+    image: alpine/curl:latest
+    container_name: family-points-webhook
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["sleep", "infinity"]
+
+networks:
+  family-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
