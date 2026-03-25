@@ -47,27 +47,13 @@ const Api = {
 
     // 认证相关
     auth: {
-        async register(email, password, username, familyName) {
-            const data = await Api.request('auth.php', {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'register',
-                    email,
-                    password,
-                    username,
-                    family_name: familyName
-                })
-            });
-            Api.setAuth(data.token, data.user);
-            return data;
-        },
-
-        async login(email, password) {
+        // 通过成员ID登录（家庭名+成员名+密码）
+        async loginByMember(memberId, password) {
             const data = await Api.request('auth.php', {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'login',
-                    email,
+                    member_id: memberId,
                     password
                 })
             });
@@ -75,6 +61,23 @@ const Api = {
             return data;
         },
 
+        // 初始化：创建家庭并注册第一个成员
+        async setupFamily(data) {
+            const result = await Api.request('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'setup',
+                    member_id: data.member_id,
+                    member_name: data.member_name,
+                    role: data.role,
+                    password: data.password
+                })
+            });
+            Api.setAuth(result.token, result.user);
+            return result;
+        },
+
+        // 家长创建成员
         async createChild(username, password) {
             return Api.request('auth.php', {
                 method: 'POST',
@@ -86,6 +89,19 @@ const Api = {
             });
         },
 
+        // 家长创建家长账号
+        async createParent(username, password) {
+            return Api.request('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'create_parent',
+                    username,
+                    password
+                })
+            });
+        },
+
+        // 获取当前用户资料
         async getProfile() {
             return Api.request('auth.php');
         }

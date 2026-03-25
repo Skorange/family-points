@@ -7,16 +7,17 @@ SET CHARACTER SET utf8mb4;
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     family_id INT,
+    member_id VARCHAR(50) DEFAULT NULL COMMENT '预设成员ID（p_dad/p_mom等）',
     username VARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) DEFAULT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('parent', 'child') NOT NULL DEFAULT 'child',
     avatar VARCHAR(255) DEFAULT NULL,
     points INT NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_email (email),
-    INDEX idx_family (family_id)
+    INDEX idx_family (family_id),
+    INDEX idx_member (member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 家庭表

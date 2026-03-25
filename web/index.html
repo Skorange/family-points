@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#FF6B35">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>家庭积分星球</title>
+    <title>南瓜之家</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -86,7 +86,7 @@
         }
 
         /* 页面内容 */
-        .page { display: none; padding: 16px; }
+        .page { display: none; padding: 16px; padding-bottom: 80px; }
         .page.active { display: block; }
 
         /* 卡片 */
@@ -166,6 +166,7 @@
             border: 2px solid var(--border);
             border-radius: 8px;
             font-size: 16px;
+            font-family: inherit;
             transition: border-color 0.2s;
         }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
@@ -240,7 +241,7 @@
             border-left: 3px solid var(--primary);
         }
 
-        /* 数字徽章 */
+        /* 数字卡片 */
         .stat-card {
             text-align: center;
             padding: 16px;
@@ -266,20 +267,20 @@
             width: 100%;
             max-width: 320px;
         }
-        .login-card h2 { text-align: center; font-size: 24px; color: var(--primary); margin-bottom: 8px; }
-        .login-card p { text-align: center; color: var(--text-light); font-size: 14px; margin-bottom: 24px; }
-        .login-card input {
+        .login-card h2 { text-align: center; font-size: 24px; color: var(--primary); margin-bottom: 4px; }
+        .login-card .subtitle { text-align: center; color: var(--text-light); font-size: 13px; margin-bottom: 24px; }
+        .login-card select, .login-card input {
             width: 100%;
             padding: 14px;
             margin-bottom: 12px;
             border: 2px solid var(--border);
             border-radius: 10px;
             font-size: 16px;
+            font-family: inherit;
         }
-        .login-card input:focus { outline: none; border-color: var(--primary); }
-        .login-tabs { display: flex; margin-bottom: 20px; }
-        .login-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid var(--border); color: var(--text-light); }
-        .login-tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
+        .login-card select:focus, .login-card input:focus { outline: none; border-color: var(--primary); }
+        .login-card .hint { font-size: 12px; color: var(--text-light); text-align: center; margin-top: 16px; }
+        .login-card .hint a { color: var(--primary); cursor: pointer; }
 
         /* 浮动添加按钮 */
         .fab {
@@ -298,37 +299,56 @@
             z-index: 50;
         }
 
-        /* 工具栏 */
-        .toolbar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
+        /* 成员选择网格 */
+        .member-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
         }
-        .toolbar .btn { flex: 1; min-width: 80px; }
+        .member-btn {
+            padding: 16px 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+        .member-btn:hover { border-color: var(--primary-light); }
+        .member-btn.selected { border-color: var(--primary); background: #fff3ee; }
+        .member-btn .avatar { font-size: 32px; margin-bottom: 4px; }
+        .member-btn .name { font-size: 14px; font-weight: 600; }
+        .member-btn .role { font-size: 11px; color: var(--text-light); }
     </style>
 </head>
 <body>
     <!-- 登录页 -->
     <div id="loginPage" class="login-page">
         <div class="login-card">
-            <h2>🎃 积分星球</h2>
-            <p>让孩子在快乐中成长</p>
-            <div class="login-tabs">
-                <div class="login-tab active" onclick="switchLoginTab('login')">登录</div>
-                <div class="login-tab" onclick="switchLoginTab('register')">注册</div>
+            <h2>🎃 南瓜之家</h2>
+            <p class="subtitle">家庭积分管理系统</p>
+
+            <!-- 成员选择（已设置好账号时显示） -->
+            <div id="memberSelectSection">
+                <div class="member-grid" id="memberGrid"></div>
+                <div id="pwdSection" style="display:none">
+                    <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+                    <button class="btn btn-block" onclick="handleLogin()">进入</button>
+                </div>
+                <p class="hint">还没有账号？<a onclick="showSetup()" id="setupLink">初始化设置</a></p>
             </div>
-            <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="邮箱">
-                <input type="password" id="loginPassword" placeholder="密码">
-                <button class="btn btn-block" onclick="handleLogin()">登录</button>
-            </div>
-            <div id="registerForm" style="display:none">
-                <input type="text" id="regName" placeholder="你的名字">
-                <input type="email" id="regEmail" placeholder="邮箱">
-                <input type="password" id="regPassword" placeholder="密码（至少6位）">
-                <input type="text" id="regFamily" placeholder="家庭名称（可选）">
-                <button class="btn btn-block" onclick="handleRegister()">创建家庭</button>
+
+            <!-- 初始化设置（首次使用） -->
+            <div id="setupSection" style="display:none">
+                <p class="subtitle" style="margin-bottom:16px">初始化家庭设置</p>
+                <div class="member-grid" id="setupMemberGrid"></div>
+                <div id="setupPwdSection" style="display:none">
+                    <input type="password" id="setupPassword" placeholder="设置密码（至少6位）" autocomplete="new-password">
+                    <input type="password" id="setupPassword2" placeholder="确认密码" autocomplete="new-password">
+                    <button class="btn btn-block" onclick="handleSetup()">完成设置</button>
+                </div>
+                <p class="hint"><a onclick="showMemberSelect()">返回登录</a></p>
             </div>
         </div>
     </div>
@@ -337,34 +357,29 @@
     <div id="appPage" style="display:none">
         <div class="header">
             <div class="header-top">
-                <h1>🎃 家庭积分星球</h1>
-                <span class="logout" onclick="logout()">退出</span>
+                <h1>🎃 <span id="headerTitle">南瓜之家</span></h1>
+                <span class="logout" onclick="doLogout()">退出</span>
             </div>
-            <div style="font-size:12px;opacity:0.9;margin-top:4px" id="userInfo">家长</div>
+            <div style="font-size:12px;opacity:0.9;margin-top:4px" id="userInfo"></div>
         </div>
 
         <!-- 底部导航 -->
         <nav class="nav">
             <div class="nav-item active" onclick="switchPage('home')">
-                <span class="icon">🏠</span>
-                <span>首页</span>
+                <span class="icon">🏠</span><span>首页</span>
             </div>
             <div class="nav-item" onclick="switchPage('tasks')">
-                <span class="icon">📋</span>
-                <span>任务</span>
+                <span class="icon">📋</span><span>任务</span>
             </div>
             <div class="nav-item" onclick="switchPage('shop')">
-                <span class="icon">🎁</span>
-                <span>商城</span>
+                <span class="icon">🎁</span><span>商城</span>
             </div>
-            <div class="nav-item" onclick="switchPage('approve')" id="approveNav">
-                <span class="icon">📮</span>
-                <span>审批</span>
+            <div class="nav-item" onclick="switchPage('approve')" id="approveNav" style="display:none">
+                <span class="icon">📮</span><span>审批</span>
                 <span class="badge" id="approveBadge" style="display:none">0</span>
             </div>
             <div class="nav-item" onclick="switchPage('settings')">
-                <span class="icon">⚙️</span>
-                <span>我的</span>
+                <span class="icon">⚙️</span><span>我的</span>
             </div>
         </nav>
 
@@ -375,13 +390,13 @@
 
         <!-- 任务页 -->
         <div id="tasksPage" class="page">
-            <button class="fab" onclick="showAddTask()" id="addTaskBtn" style="display:none">+</button>
+            <button class="fab" onclick="showAddTask()" id="addTaskFab" style="display:none">+</button>
             <div id="tasksContent"></div>
         </div>
 
         <!-- 商城页 -->
         <div id="shopPage" class="page">
-            <button class="fab" onclick="showAddReward()" id="addRewardBtn" style="display:none">+</button>
+            <button class="fab" onclick="showAddReward()" id="addRewardFab" style="display:none">+</button>
             <div id="shopContent"></div>
         </div>
 
@@ -444,10 +459,6 @@
                 <label>所需积分</label>
                 <input type="number" id="rewardCost" value="50" min="1">
             </div>
-            <div class="form-group">
-                <label>库存（-1=无限）</label>
-                <input type="number" id="rewardStock" value="-1" min="-1">
-            </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeRewardModal()">取消</button>
                 <button class="btn" onclick="saveReward()">保存</button>
@@ -462,11 +473,18 @@
     <script>
         let currentPage = 'home';
         let isParent = false;
+        let selectedMemberId = null;
+        let selectedMemberRole = null;
+        let setupSelectedMember = null;
+        let familyMembers = [];
 
         // 页面加载
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             if (Api.isLoggedIn()) {
-                showApp();
+                // 已登录，直接显示应用
+                const fresh = await refreshUserInfo();
+                if (fresh) showApp();
+                else { Api.logout(); showLogin(); }
             } else {
                 showLogin();
             }
@@ -475,61 +493,166 @@
         function showLogin() {
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
+            selectedMemberId = null;
+            selectedMemberRole = null;
+            loadMemberList();
+        }
+
+        async function refreshUserInfo() {
+            try {
+                const data = await Api.auth.getProfile();
+                Api.setAuth(Api.token, data.user);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        // 加载成员列表用于登录选择
+        async function loadMemberList() {
+            const grid = document.getElementById('memberGrid');
+            const setupGrid = document.getElementById('setupMemberGrid');
+
+            // 尝试获取成员列表（不需要登录）
+            try {
+                // 先检查是否已有账号
+                const res = await fetch('api/auth.php?action=members', { method: 'GET' });
+                const data = await res.json();
+                if (data.members && data.members.length > 0) {
+                    familyMembers = data.members;
+                    renderMemberGrid(grid, familyMembers, false);
+                    document.getElementById('memberSelectSection').style.display = 'block';
+                    document.getElementById('setupSection').style.display = 'none';
+                    document.getElementById('setupLink').style.display = '';
+                    return;
+                }
+            } catch {}
+
+            // 无账号，显示初始化
+            familyMembers = [
+                { id: 'p_dad',   username: '爸爸', role: 'parent', avatar: '👨' },
+                { id: 'p_mom',   username: '妈妈', role: 'parent', avatar: '👩' },
+                { id: 'p_grandpa', username: '爷爷', role: 'parent', avatar: '👴' },
+                { id: 'p_grandma', username: '奶奶', role: 'parent', avatar: '👵' },
+                { id: 'c_pumpkin', username: '小南瓜', role: 'child', avatar: '🎃' },
+                { id: 'c_chestnut', username: '小栗子', role: 'child', avatar: '🌰' },
+            ];
+            document.getElementById('memberSelectSection').style.display = 'none';
+            document.getElementById('setupSection').style.display = 'block';
+            renderMemberGrid(setupGrid, familyMembers, true);
+        }
+
+        function renderMemberGrid(container, members, isSetup) {
+            container.innerHTML = members.map(m => `
+                <div class="member-btn" data-id="${m.id}" data-role="${m.role}" data-name="${m.username}" data-avatar="${m.avatar}">
+                    <div class="avatar">${m.avatar}</div>
+                    <div class="name">${m.username}</div>
+                    <div class="role">${m.role === 'parent' ? '家长' : '孩子'}</div>
+                </div>
+            `).join('');
+
+            container.querySelectorAll('.member-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.member-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    const id = btn.dataset.id;
+                    const role = btn.dataset.role;
+                    const name = btn.dataset.name;
+
+                    if (isSetup) {
+                        setupSelectedMember = { id, role, name, avatar: btn.dataset.avatar };
+                        document.getElementById('setupPwdSection').style.display = 'block';
+                        document.getElementById('setupPassword').focus();
+                    } else {
+                        selectedMemberId = id;
+                        selectedMemberRole = role;
+                        selectedMemberName = name;
+                        document.getElementById('pwdSection').style.display = 'block';
+                        document.getElementById('loginPassword').focus();
+                    }
+                });
+            });
+        }
+
+        let selectedMemberName = '';
+
+        // 登录
+        async function handleLogin() {
+            const password = document.getElementById('loginPassword').value;
+            if (!selectedMemberId || !password) { showToast('请选择成员并输入密码'); return; }
+            try {
+                const data = await Api.auth.loginByMember(selectedMemberId, password);
+                showApp();
+                showToast('欢迎，' + data.user.username + '！');
+            } catch (e) { showToast(e.message); }
+        }
+
+        // 初始化设置
+        async function handleSetup() {
+            const pw1 = document.getElementById('setupPassword').value;
+            const pw2 = document.getElementById('setupPassword2').value;
+            if (!setupSelectedMember || !pw1 || !pw2) { showToast('请选择成员并填写密码'); return; }
+            if (pw1.length < 6) { showToast('密码至少6位'); return; }
+            if (pw1 !== pw2) { showToast('两次密码不一致'); return; }
+
+            try {
+                const data = await Api.auth.setupFamily({
+                    member_id: setupSelectedMember.id,
+                    member_name: setupSelectedMember.name,
+                    role: setupSelectedMember.role,
+                    password: pw1
+                });
+                Api.setAuth(data.token, data.user);
+                showApp();
+                showToast('初始化成功！');
+            } catch (e) { showToast(e.message); }
+        }
+
+        function showSetup() {
+            document.getElementById('memberSelectSection').style.display = 'none';
+            document.getElementById('setupSection').style.display = 'block';
+        }
+
+        function showMemberSelect() {
+            document.getElementById('setupSection').style.display = 'none';
+            document.getElementById('memberSelectSection').style.display = 'block';
+            setupSelectedMember = null;
         }
 
         function showApp() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'block';
             isParent = Api.isParent();
-            document.getElementById('userInfo').textContent = Api.user.username + ' · ' + (isParent ? '家长' : '孩子');
+            const user = Api.user;
+            document.getElementById('userInfo').textContent =
+                (user.avatar || '') + ' ' + user.username + ' · ' + (isParent ? '家长' : '孩子');
+            currentPage = 'home';
+
+            // 重置导航高亮
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector('.nav-item').classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('homePage').classList.add('active');
+
             loadPage();
         }
 
-        // 切换登录标签
-        function switchLoginTab(tab) {
-            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-        }
-
-        // 登录
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            if (!email || !password) { showToast('请填写邮箱和密码'); return; }
-            try {
-                await Api.auth.login(email, password);
-                showApp();
-                showToast('登录成功');
-            } catch (e) { showToast(e.message); }
-        }
-
-        // 注册
-        async function handleRegister() {
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const family = document.getElementById('regFamily').value.trim();
-            if (!name || !email || !password) { showToast('请填写必填字段'); return; }
-            try {
-                await Api.auth.register(email, password, name, family);
-                showApp();
-                showToast('注册成功');
-            } catch (e) { showToast(e.message); }
-        }
-
-        // 退出登录
-        function logout() {
+        // 退出登录 — 完全重置状态并刷新
+        function doLogout() {
             Api.logout();
-            showLogin();
+            isParent = false;
+            currentPage = 'home';
+            selectedMemberId = null;
+            selectedMemberRole = null;
+            setupSelectedMember = null;
+            location.reload();
         }
 
         // 切换页面
         function switchPage(page) {
             currentPage = page;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
+            event.currentTarget.classList.add('active');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(page + 'Page').classList.add('active');
             loadPage();
@@ -537,10 +660,13 @@
 
         // 加载页面
         async function loadPage() {
-            // 显示/隐藏家长专属元素
-            document.getElementById('addTaskBtn').style.display = isParent ? 'block' : 'none';
-            document.getElementById('addRewardBtn').style.display = isParent ? 'block' : 'none';
-            document.getElementById('approveNav').style.display = isParent ? 'flex' : 'none';
+            // 家长专属元素
+            const fab1 = document.getElementById('addTaskFab');
+            const fab2 = document.getElementById('addRewardFab');
+            const navApprove = document.getElementById('approveNav');
+            if (fab1) fab1.style.display = isParent ? 'block' : 'none';
+            if (fab2) fab2.style.display = isParent ? 'block' : 'none';
+            if (navApprove) navApprove.style.display = isParent ? 'flex' : 'none';
 
             switch (currentPage) {
                 case 'home': await loadHomePage(); break;
@@ -554,13 +680,13 @@
         // 首页
         async function loadHomePage() {
             let html = '';
-
-            if (isParent) {
-                // 家长首页：孩子积分 + 待审批
-                html += '<div class="card"><div class="card-title">📊 家庭概览</div>';
-                try {
-                    const familyData = await Api.family.list();
-                    const children = (familyData.members || []).filter(m => m.role === 'child');
+            try {
+                const rankData = await Api.points.ranking();
+                const allMembers = rankData.ranking || [];
+                // 孩子显示积分排行，家长显示孩子积分列表
+                if (isParent) {
+                    const children = allMembers.filter(m => m.role === 'child');
+                    html += '<div class="card"><div class="card-title">📊 家庭概览</div>';
                     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">';
                     html += '<div class="stat-card"><div class="num">' + children.length + '</div><div class="label">孩子数量</div></div>';
                     const pending = await Api.rewards.pendingApprovals();
@@ -571,44 +697,39 @@
                     if (children.length > 0) {
                         html += '<div class="section-title">孩子积分</div>';
                         children.forEach(c => {
-                            html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">';
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
                             html += '<div><div style="font-weight:600">' + c.username + '</div>';
                             html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分余额</div></div>';
                             html += '<div style="text-align:right"><div style="font-size:24px;color:var(--primary);font-weight:bold">' + c.points + '</div>';
                             html += '<div style="font-size:12px;color:var(--text-light)">分</div></div></div></div>';
                         });
+                    } else {
+                        html += '<div class="empty"><div class="icon">👶</div><p>暂无孩子账号<br><small style="color:var(--text-light)">在「我的」页面添加</small></p></div>';
                     }
-                } catch (e) { html += '<p>加载失败</p></div>'; }
-            } else {
-                // 孩子首页：我的积分
-                try {
+                } else {
+                    // 孩子：我的积分
                     const pointsData = await Api.points.history();
                     html += '<div class="card points-big">';
                     html += '<div class="label">我的积分</div>';
                     html += '<div class="value">' + pointsData.current_points + '<span class="unit">分</span></div>';
                     html += '</div>';
-                } catch (e) { html += '<div class="card"><p>加载失败</p></div>'; }
-            }
+                }
 
-            // 积分排行
-            html += '<div class="section-title">🏆 积分排行</div>';
-            html += '<div class="card">';
-            try {
-                const rankData = await Api.points.ranking();
-                const ranking = rankData.ranking || [];
-                if (ranking.length === 0) {
-                    html += '<p class="empty">暂无排行数据</p>';
-                } else {
-                    ranking.forEach((item, i) => {
-                        const medal = ['', '🥇', '🥈', '🥉'][i] || (i + 1);
+                // 积分排行（孩子 + 孩子，家长只在这里看）
+                const childMembers = allMembers.filter(m => m.role === 'child');
+                if (childMembers.length > 0) {
+                    html += '<div class="section-title">🏆 积分排行</div>';
+                    html += '<div class="card">';
+                    childMembers.forEach((item, i) => {
+                        const medal = ['🥇','🥈','🥉'][i] || (i + 1) + '.';
                         html += '<div class="list-item">';
                         html += '<div><span style="margin-right:8px">' + medal + '</span>' + item.username + '</div>';
                         html += '<div style="color:var(--primary);font-weight:600">' + item.points + '分</div>';
                         html += '</div>';
                     });
+                    html += '</div>';
                 }
-            } catch (e) { html += '<p>加载失败</p>'; }
-            html += '</div>';
+            } catch (e) { html += '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
 
             document.getElementById('homeContent').innerHTML = html;
         }
@@ -626,28 +747,27 @@
                     html += '</div>';
                 } else {
                     tasks.forEach(task => {
+                        const canComplete = task.can_complete;
                         html += '<div class="card">';
                         html += '<div style="display:flex;justify-content:space-between;align-items:start">';
                         html += '<div style="flex:1"><div class="card-title">' + task.title + '</div>';
                         if (task.description) html += '<div class="card-meta">' + task.description + '</div>';
                         html += '<div class="card-meta">' + getRepeatText(task.repeat_type) + '</div></div>';
                         html += '<span class="tag">+' + task.points + '</span></div>';
+                        html += '<div style="margin-top:12px">';
 
                         if (isParent) {
-                            html += '<div style="margin-top:12px;display:flex;gap:8px">';
-                            html += '<button class="btn btn-sm btn-outline" onclick="editTask(' + task.id + ',\'' + task.title + '\',\'' + (task.description || '') + '\',' + task.points + ',\'' + task.repeat_type + '\')">编辑</button>';
+                            html += '<button class="btn btn-sm btn-outline" style="margin-right:8px" onclick="editTask(' + task.id + ')">编辑</button>';
                             html += '<button class="btn btn-sm btn-danger" onclick="deleteTask(' + task.id + ')">删除</button>';
-                            html += '</div>';
                         } else {
-                            const canComplete = task.can_complete;
-                            html += '<button class="btn btn-sm ' + (canComplete ? 'btn-success' : 'btn-outline') + '" style="margin-top:12px" onclick="completeTask(' + task.id + ')" ' + (canComplete ? '' : 'disabled') + '>';
-                            html += canComplete ? '完成' : '已完成';
+                            html += '<button class="btn btn-sm ' + (canComplete ? 'btn-success' : 'btn-outline') + '" onclick="completeTask(' + task.id + ')" ' + (canComplete ? '' : 'disabled') + '>';
+                            html += canComplete ? '完成任务' : '已完成';
                             html += '</button>';
                         }
-                        html += '</div>';
+                        html += '</div></div>';
                     });
                 }
-            } catch (e) { html = '<div class="card"><p>加载失败</p></div>'; }
+            } catch (e) { html = '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
 
             document.getElementById('tasksContent').innerHTML = html;
         }
@@ -660,36 +780,38 @@
                 const rewards = data.rewards || [];
                 const myRedemptions = data.my_redemptions || [];
 
-                if (rewards.length === 0) {
-                    html = '<div class="empty"><div class="icon">🎁</div><p>暂无奖励</p></div>';
+                if (rewards.length === 0 && myRedemptions.length === 0) {
+                    html = '<div class="empty"><div class="icon">🎁</div><p>暂无奖励</p>';
+                    if (isParent) html += '<button class="btn btn-sm" onclick="showAddReward()">添加奖励</button>';
+                    html += '</div>';
                 } else {
-                    html += '<div class="section-title">可兑换奖励</div>';
-                    rewards.forEach(r => {
-                        html += '<div class="card">';
-                        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
-                        html += '<div style="flex:1"><div class="card-title">' + r.title + '</div>';
-                        if (r.description) html += '<div class="card-meta">' + r.description + '</div>';
-                        html += '<div class="card-meta">库存: ' + (r.stock === -1 ? '无限' : r.stock) + '</div></div>';
-                        html += '<span class="tag">' + r.points_cost + '分</span></div>';
+                    if (rewards.length > 0) {
+                        html += '<div class="section-title">可兑换奖励</div>';
+                        rewards.forEach(r => {
+                            html += '<div class="card">';
+                            html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+                            html += '<div style="flex:1"><div class="card-title">' + r.title + '</div>';
+                            if (r.description) html += '<div class="card-meta">' + r.description + '</div>';
+                            html += '<div class="card-meta">库存: ' + (r.stock === -1 ? '无限' : r.stock) + '</div></div>';
+                            html += '<span class="tag">' + r.points_cost + '分</span></div>';
+                            if (!isParent) {
+                                html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="redeemReward(' + r.id + ')">申请兑换</button>';
+                            }
+                            html += '</div>';
+                        });
+                    }
 
-                        if (!isParent) {
-                            html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="redeemReward(' + r.id + ')">申请兑换</button>';
-                        }
-                        html += '</div>';
-                    });
-                }
-
-                // 我的兑换记录
-                if (myRedemptions.length > 0) {
-                    html += '<div class="section-title">我的兑换记录</div>';
-                    myRedemptions.forEach(r => {
-                        const statusClass = { pending: 'tag-pending', approved: 'tag-success', rejected: 'tag-danger' }[r.status] || '';
-                        const statusText = { pending: '待审批', approved: '已通过', rejected: '已拒绝' }[r.status] || r.status;
-                        html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                        html += '<div><div>' + r.reward_title + '</div><div class="card-meta">' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
-                        html += '<span class="tag ' + statusClass + '">' + statusText + '</span>';
-                        html += '</div></div>';
-                    });
+                    if (myRedemptions.length > 0) {
+                        html += '<div class="section-title">我的兑换记录</div>';
+                        myRedemptions.forEach(r => {
+                            const statusMap = { pending: '待审批', approved: '已通过', rejected: '已拒绝' };
+                            const clsMap = { pending: 'tag-pending', approved: 'tag-success', rejected: 'tag-danger' };
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                            html += '<div><div>' + r.reward_title + '</div><div class="card-meta">' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
+                            html += '<span class="tag ' + (clsMap[r.status] || '') + '">' + (statusMap[r.status] || r.status) + '</span>';
+                            html += '</div></div>';
+                        });
+                    }
                 }
             } catch (e) { html = '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
 
@@ -699,7 +821,6 @@
         // 审批页（家长）
         async function loadApprovePage() {
             if (!isParent) return;
-
             let html = '';
             try {
                 const data = await Api.rewards.pendingApprovals();
@@ -730,11 +851,9 @@
                 const data = await Api.rewards.pendingApprovals();
                 const count = (data.pending || []).length;
                 const badge = document.getElementById('approveBadge');
-                if (count > 0) {
-                    badge.textContent = count;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.style.display = 'none';
+                if (badge) {
+                    if (count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
+                    else { badge.style.display = 'none'; }
                 }
             } catch (e) {}
         }
@@ -744,50 +863,64 @@
             let html = '';
 
             if (isParent) {
-                // 家长：孩子管理 + 家庭资料
-                html += '<div class="section-title">👨‍👩‍👧 孩子管理</div>';
+                html += '<div class="section-title">👨‍👩‍👧 成员管理</div>';
                 html += '<div class="card">';
-                html += '<div class="form-group"><label>创建孩子账号</label><input type="text" id="childName" placeholder="孩子用户名"></div>';
-                html += '<div class="form-group"><input type="password" id="childPass" placeholder="密码"></div>';
-                html += '<button class="btn btn-sm" onclick="createChild()">创建</button>';
-                html += '</div>';
+                html += '<div class="form-group"><label>添加成员</label>';
+                html += '<input type="text" id="memberName" placeholder="成员名称（如：哥哥）">';
+                html += '<select id="memberRole" style="margin-top:8px"><option value="child">孩子</option><option value="parent">家长</option></select>';
+                html += '<input type="password" id="memberPass" placeholder="设置密码（至少6位）" style="margin-top:8px">';
+                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="createMember()">添加</button></div></div>';
 
                 try {
                     const familyData = await Api.family.list();
-                    const children = (familyData.members || []).filter(m => m.role === 'child');
-                    children.forEach(c => {
-                        html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                        html += '<div><div style="font-weight:600">' + c.username + '</div>';
-                        html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分: ' + c.points + '</div></div>';
-                        html += '<div style="display:flex;gap:4px">';
-                        html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 10)">+10</button>';
-                        html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 50)">+50</button>';
-                        html += '<button class="btn btn-sm btn-danger" onclick="adjustPoints(' + c.id + ', -10)">-10</button>';
-                        html += '</div></div></div>';
-                    });
+                    const members = (familyData.members || []);
+                    const children = members.filter(m => m.role === 'child');
+                    const parents = members.filter(m => m.role === 'parent');
+
+                    if (parents.length > 0) {
+                        html += '<div style="margin-top:16px"><strong style="font-size:13px;color:var(--text-light)">家长</strong></div>';
+                        parents.forEach(m => {
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                            html += '<div style="font-weight:600">' + m.username + '</div>';
+                            html += '</div></div>';
+                        });
+                    }
+
+                    if (children.length > 0) {
+                        html += '<div style="margin-top:16px"><strong style="font-size:13px;color:var(--text-light)">孩子</strong></div>';
+                        children.forEach(c => {
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                            html += '<div><div style="font-weight:600">' + c.username + '</div>';
+                            html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分: ' + c.points + '</div></div>';
+                            html += '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">';
+                            html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 10)">+10</button>';
+                            html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 50)">+50</button>';
+                            html += '<button class="btn btn-sm btn-danger" onclick="adjustPoints(' + c.id + ', -10)">-10</button>';
+                            html += '</div></div></div>';
+                        });
+                    }
                 } catch (e) {}
 
-                // 家庭资料
+                // 生日管理
                 html += '<div class="section-title">📅 生日管理</div>';
                 html += '<div class="card">';
-                html += '<div class="form-group"><label>添加生日</label><input type="text" id="birthdayName" placeholder="成员名称"></div>';
-                html += '<div class="form-group"><input type="date" id="birthdayDate"></div>';
-                html += '<button class="btn btn-sm" onclick="addBirthday()">添加</button>';
-                html += '</div>';
+                html += '<div class="form-group"><label>添加生日</label>';
+                html += '<input type="text" id="birthdayName" placeholder="成员名称">';
+                html += '<input type="date" id="birthdayDate" style="margin-top:8px">';
+                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="addBirthday()">添加</button></div></div>';
                 html += '<div id="birthdayList"></div>';
 
+                // 证件管理
                 html += '<div class="section-title">📁 证件管理</div>';
                 html += '<div class="card">';
-                html += '<div class="form-group"><label>添加证件</label><input type="text" id="docName" placeholder="证件名称"></div>';
-                html += '<div class="form-group"><input type="text" id="docInfo" placeholder="证件信息"></div>';
-                html += '<button class="btn btn-sm" onclick="addDocument()">添加</button>';
-                html += '</div>';
+                html += '<div class="form-group"><label>添加证件</label>';
+                html += '<input type="text" id="docName" placeholder="证件名称">';
+                html += '<input type="text" id="docInfo" placeholder="证件信息" style="margin-top:8px">';
+                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="addDocument()">添加</button></div></div>';
                 html += '<div id="documentList"></div>';
 
-                // 加载生日和证件
                 loadFamilyInfo();
             } else {
-                // 孩子：积分历史 + 家庭生日
                 html += '<div class="section-title">💰 积分明细</div>';
                 html += '<div class="card">';
                 try {
@@ -823,7 +956,6 @@
                 const data = await Api.family.list();
                 const info = data.info || [];
 
-                // 生日
                 const birthdays = info.filter(i => i.category === 'birthday');
                 let bHtml = '';
                 birthdays.forEach(b => {
@@ -839,9 +971,9 @@
                     }
                     bHtml += '</div></div>';
                 });
-                document.getElementById('birthdayList').innerHTML = bHtml;
+                const bList = document.getElementById('birthdayList');
+                if (bList) bList.innerHTML = bHtml || '<div class="empty"><p>暂无生日记录</p></div>';
 
-                // 证件
                 const docs = info.filter(i => i.category === 'document');
                 let dHtml = '';
                 docs.forEach(d => {
@@ -853,11 +985,12 @@
                     }
                     dHtml += '</div></div>';
                 });
-                document.getElementById('documentList').innerHTML = dHtml;
+                const dList = document.getElementById('documentList');
+                if (dList) dList.innerHTML = dHtml || '<div class="empty"><p>暂无证件记录</p></div>';
             } catch (e) { console.error(e); }
         }
 
-        // 任务操作
+        // ========== 任务操作 ==========
         function showAddTask() {
             document.getElementById('taskModalTitle').textContent = '添加任务';
             document.getElementById('editTaskId').value = '';
@@ -868,13 +1001,16 @@
             document.getElementById('taskModal').classList.add('show');
         }
 
-        function editTask(id, title, desc, points, repeat) {
+        async function editTask(id) {
+            const data = await Api.tasks.list();
+            const task = (data.tasks || []).find(t => t.id == id);
+            if (!task) return;
             document.getElementById('taskModalTitle').textContent = '编辑任务';
             document.getElementById('editTaskId').value = id;
-            document.getElementById('taskName').value = title;
-            document.getElementById('taskDesc').value = desc;
-            document.getElementById('taskPoints').value = points;
-            document.getElementById('taskRepeat').value = repeat;
+            document.getElementById('taskName').value = task.title;
+            document.getElementById('taskDesc').value = task.description || '';
+            document.getElementById('taskPoints').value = task.points;
+            document.getElementById('taskRepeat').value = task.repeat_type;
             document.getElementById('taskModal').classList.add('show');
         }
 
@@ -892,14 +1028,8 @@
             };
             if (!data.title) { showToast('请输入任务名称'); return; }
             try {
-                if (id) {
-                    data.id = id;
-                    await Api.tasks.update(data);
-                    showToast('任务已更新');
-                } else {
-                    await Api.tasks.create(data);
-                    showToast('任务已创建');
-                }
+                if (id) { data.id = id; await Api.tasks.update(data); showToast('任务已更新'); }
+                else { await Api.tasks.create(data); showToast('任务已创建'); }
                 closeTaskModal();
                 loadTasksPage();
             } catch (e) { showToast(e.message); }
@@ -914,7 +1044,7 @@
         }
 
         async function deleteTask(id) {
-            if (!confirm('确定删除？')) return;
+            if (!confirm('确定删除该任务？')) return;
             try {
                 await Api.tasks.delete(id);
                 showToast('已删除');
@@ -922,12 +1052,11 @@
             } catch (e) { showToast(e.message); }
         }
 
-        // 奖励操作
+        // ========== 奖励操作 ==========
         function showAddReward() {
             document.getElementById('rewardName').value = '';
             document.getElementById('rewardDesc').value = '';
             document.getElementById('rewardCost').value = '50';
-            document.getElementById('rewardStock').value = '-1';
             document.getElementById('rewardModal').classList.add('show');
         }
 
@@ -939,8 +1068,7 @@
             const data = {
                 title: document.getElementById('rewardName').value.trim(),
                 description: document.getElementById('rewardDesc').value.trim(),
-                points_cost: parseInt(document.getElementById('rewardCost').value) || 50,
-                stock: parseInt(document.getElementById('rewardStock').value) || -1
+                points_cost: parseInt(document.getElementById('rewardCost').value) || 50
             };
             if (!data.title) { showToast('请输入奖励名称'); return; }
             try {
@@ -954,12 +1082,12 @@
         async function redeemReward(id) {
             try {
                 await Api.rewards.redeem(id);
-                showToast('兑换申请已提交');
+                showToast('兑换申请已提交，等待审批');
                 loadShopPage();
             } catch (e) { showToast(e.message); }
         }
 
-        // 审批操作
+        // ========== 审批操作 ==========
         async function handleApprove(id, approve) {
             try {
                 await Api.rewards.approve(id, approve ? 'approve' : 'reject');
@@ -969,16 +1097,22 @@
             } catch (e) { showToast(e.message); }
         }
 
-        // 孩子管理
-        async function createChild() {
-            const name = document.getElementById('childName').value.trim();
-            const pass = document.getElementById('childPass').value;
-            if (!name || !pass) { showToast('请填写用户名和密码'); return; }
+        // ========== 成员管理 ==========
+        async function createMember() {
+            const name = document.getElementById('memberName').value.trim();
+            const role = document.getElementById('memberRole').value;
+            const pass = document.getElementById('memberPass').value;
+            if (!name || !pass) { showToast('请填写名称和密码'); return; }
+            if (pass.length < 6) { showToast('密码至少6位'); return; }
             try {
-                await Api.auth.createChild(name, pass);
-                showToast('孩子账号已创建');
-                document.getElementById('childName').value = '';
-                document.getElementById('childPass').value = '';
+                if (role === 'child') {
+                    await Api.auth.createChild(name, pass);
+                } else {
+                    await Api.auth.createParent(name, pass);
+                }
+                showToast('成员已添加');
+                document.getElementById('memberName').value = '';
+                document.getElementById('memberPass').value = '';
                 loadSettingsPage();
             } catch (e) { showToast(e.message); }
         }
@@ -992,7 +1126,7 @@
             } catch (e) { showToast(e.message); }
         }
 
-        // 家庭资料
+        // ========== 家庭资料 ==========
         async function addBirthday() {
             const name = document.getElementById('birthdayName').value.trim();
             const date = document.getElementById('birthdayDate').value;
@@ -1028,7 +1162,7 @@
             } catch (e) { showToast(e.message); }
         }
 
-        // 工具函数
+        // ========== 工具函数 ==========
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
