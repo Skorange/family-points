@@ -207,6 +207,10 @@ const Api = {
 
         async pendingApprovals() {
             return Api.request('rewards.php?type=pending');
+        },
+
+        async redemptionHistory() {
+            return Api.request('rewards.php?type=history');
         }
     },
 

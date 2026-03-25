@@ -83,7 +83,7 @@
         }
 
         /* Page */
-        .page { display: none; padding: 16px; padding-bottom: 80px; }
+        .page { display: none; padding: 16px; padding-bottom: 140px; }
         .page.active { display: block; }
 
         /* Announcement */
@@ -244,10 +244,15 @@
         .upcoming-tag { background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 10px; font-size: 12px; white-space: nowrap; }
         .upcoming-tag.today { background: white; color: #e91e63; font-weight: 600; }
 
+        /* Approval tabs */
+        .approve-tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--border); border-radius: 10px; padding: 4px; }
+        .approve-tab { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 8px; font-size: 14px; color: var(--text-light); cursor: pointer; transition: all 0.2s; }
+        .approve-tab.active { background: var(--white); color: var(--primary); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
         /* Landscape / tablet optimization */
         @media (orientation: landscape) {
-            body { max-width: 100%; padding-bottom: 10px; }
-            .page { padding: 12px 24px; }
+            body { max-width: 100%; padding-bottom: 16px; }
+            .page { padding: 12px 24px; padding-bottom: 80px; }
             .card { padding: 14px; }
         }
         @media (min-width: 600px) {
@@ -553,6 +558,8 @@
             if (!selectedMemberId || !pw) { showToast('请选择成员并输入密码', 'error'); return; }
             try {
                 const data = await Api.auth.loginByMember(selectedMemberId, pw);
+                // 立即刷新用户信息（确保积分等数据最新）
+                await refreshUserInfo();
                 showApp();
                 showToast('欢迎，' + data.user.username + '！', 'success');
             } catch (e) { showToast(e.message, 'error'); }
@@ -666,13 +673,18 @@
                     // 爷爷奶奶 / 孩子：只看积分
                     if (Api.isChild()) {
                         let myPoints = Api.user?.points || 0;
+                        let ptsLoadFailed = false;
                         try {
                             const pts = await Api.points.history();
-                            myPoints = pts.current_points;
-                        } catch {}
+                            myPoints = pts.current_points ?? myPoints;
+                        } catch {
+                            ptsLoadFailed = true;
+                        }
                         html += '<div class="card points-big">';
                         html += '<div class="label">我的积分</div>';
                         html += '<div class="value">' + myPoints + '<span class="unit">分</span></div>';
+                        if (ptsLoadFailed) html += '<div style="font-size:12px;color:var(--text-light);margin-top:6px">积分明细暂时无法加载</div>';
+                        html += '<button class="btn btn-sm btn-outline" style="margin-top:12px" onclick="loadHomePage()">刷新积分</button>';
                         html += '</div>';
                     } else {
                         // 爷爷奶奶：只看孩子积分
@@ -935,34 +947,70 @@
         }
 
         // ========== 审批页（爸妈） ==========
+        let approveTab = 'pending'; // 'pending' | 'history'
+
         async function loadApprovePage() {
             if (!Api.canOperate()) return;
             let html = '';
+
+            // Tab切换
+            html += '<div class="approve-tabs">';
+            html += '<button class="approve-tab ' + (approveTab === 'pending' ? 'active' : '') + '" onclick="switchApproveTab(\'pending\')">待审批</button>';
+            html += '<button class="approve-tab ' + (approveTab === 'history' ? 'active' : '') + '" onclick="switchApproveTab(\'history\')">历史记录</button>';
+            html += '</div>';
+
             try {
-                const data = await Api.rewards.pendingApprovals();
-                const pending = data.pending || [];
-                if (pending.length === 0) {
-                    html = '<div class="empty"><div class="icon">📮</div><p>暂无待审批的兑换</p></div>';
+                if (approveTab === 'pending') {
+                    const data = await Api.rewards.pendingApprovals();
+                    const pending = data.pending || [];
+                    if (pending.length === 0) {
+                        html += '<div class="empty"><div class="icon">📮</div><p>暂无待审批的兑换</p></div>';
+                    } else {
+                        pending.forEach(p => {
+                            html += '<div class="card">';
+                            html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+                            html += '<div><div class="card-title">' + escapeHtml(p.username) + '</div>';
+                            html += '<div class="card-meta">申请兑换: ' + escapeHtml(p.reward_title) + '</div>';
+                            html += '<div class="card-meta">' + p.points_spent + '积分 · ' + formatDate(p.created_at) + '</div></div>';
+                            html += '<span class="tag tag-pending">待审批</span></div>';
+                            html += '<div style="display:flex;gap:8px;margin-top:12px">';
+                            html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="doApprove(' + p.id + ',true)">通过</button>';
+                            html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="doApprove(' + p.id + ',false)">拒绝</button>';
+                            html += '</div></div>';
+                        });
+                    }
                 } else {
-                    pending.forEach(p => {
-                        html += '<div class="card">';
-                        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
-                        html += '<div><div class="card-title">' + escapeHtml(p.username) + '</div>';
-                        html += '<div class="card-meta">申请兑换: ' + escapeHtml(p.reward_title) + '</div>';
-                        html += '<div class="card-meta">' + p.points_spent + '积分 · ' + formatDate(p.created_at) + '</div></div>';
-                        html += '<span class="tag tag-pending">待审批</span></div>';
-                        html += '<div style="display:flex;gap:8px;margin-top:12px">';
-                        html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="doApprove(' + p.id + ',true)">通过</button>';
-                        html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="doApprove(' + p.id + ',false)">拒绝</button>';
-                        html += '</div></div>';
-                    });
+                    // 历史记录：显示已处理过的兑换
+                    const data = await Api.rewards.redemptionHistory();
+                    const history = data.history || [];
+                    if (history.length === 0) {
+                        html += '<div class="empty"><div class="icon">📋</div><p>暂无历史记录</p></div>';
+                    } else {
+                        history.forEach(r => {
+                            const sm = { approved: '已通过', rejected: '已拒绝', completed: '已完成' };
+                            const cm = { approved: 'tag-success', rejected: 'tag-danger', completed: 'tag-success' };
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                            html += '<div><div>' + escapeHtml(r.reward_title) + '</div><div class="card-meta">' + r.username + ' · ' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
+                            html += '<span class="tag ' + (cm[r.status] || '') + '">' + (sm[r.status] || r.status) + '</span></div></div>';
+                        });
+                    }
                 }
-            } catch (e) { html = '<div class="card"><p>加载失败</p></div>'; }
+            } catch (e) {
+                html += '<div class="card" style="border-left:4px solid var(--danger)">';
+                html += '<p style="color:var(--danger);font-size:13px">加载失败: ' + escapeHtml(e.message || String(e)) + '</p>';
+                html += '<button class="btn btn-sm" style="margin-top:10px" onclick="loadApprovePage()">重试</button>';
+                html += '</div>';
+            }
             document.getElementById('approveContent').innerHTML = html;
         }
 
+        function switchApproveTab(tab) {
+            approveTab = tab;
+            loadApprovePage();
+        }
+
         async function doApprove(id, approve) {
-            try { await Api.rewards.approve(id, approve ? 'approve' : 'reject'); showToast(approve ? '已通过' : '已拒绝', 'success'); loadApprovePage(); } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.rewards.approve(id, approve ? 'approve' : 'reject'); showToast(approve ? '已通过' : '已拒绝', 'success'); loadApprovePage(); } catch (e) { showToast(e.message || String(e), 'error'); }
         }
 
         // ========== 日历页 ==========

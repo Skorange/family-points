@@ -25,6 +25,8 @@ try {
 
         if ($type === 'pending') {
             getPendingRedemptions($db, $user);
+        } elseif ($type === 'history') {
+            getRedemptionHistory($db, $user);
         } else {
             getRewards($db, $user);
         }
@@ -99,4 +101,36 @@ function getPendingRedemptions($db, $user) {
     $pending = $stmt->fetchAll();
 
     jsonResponse(['pending' => $pending]);
+}
+
+/**
+ * 获取家庭兑换历史（家长看全部，孩子只看自己的）
+ */
+function getRedemptionHistory($db, $user) {
+    // 家长：看全家历史；孩子：只看自己的
+    if ($user['role'] === 'parent') {
+        $stmt = $db->prepare('
+            SELECT r.*, u.username, rw.title as reward_title
+            FROM redemptions r
+            JOIN users u ON r.user_id = u.id
+            JOIN rewards rw ON r.reward_id = rw.id
+            WHERE u.family_id = ? AND r.status != "pending"
+            ORDER BY r.created_at DESC
+            LIMIT 50
+        ');
+        $stmt->execute([$user['family_id']]);
+    } else {
+        $stmt = $db->prepare('
+            SELECT r.*, u.username, rw.title as reward_title
+            FROM redemptions r
+            JOIN users u ON r.user_id = u.id
+            JOIN rewards rw ON r.reward_id = rw.id
+            WHERE r.user_id = ? AND r.status != "pending"
+            ORDER BY r.created_at DESC
+            LIMIT 50
+        ');
+        $stmt->execute([$user['id']]);
+    }
+    $history = $stmt->fetchAll();
+    jsonResponse(['history' => $history]);
 }
