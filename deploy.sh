@@ -16,7 +16,8 @@ cd "$WEBROOT"
 
 # 拉取最新代码
 log "拉取最新代码..."
-git pull origin main
+git fetch origin
+git reset --hard origin/main
 
 # 复制 .env 文件（如果不存在）
 if [ ! -f .env ]; then
