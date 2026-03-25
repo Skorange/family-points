@@ -2,3 +2,6 @@
 .DS_Store
 node_modules/
 *.log
+deploy/
+web/test*.php
+web/test.txt
