@@ -26,7 +26,16 @@ try {
             break;
         case 'POST':
             $input = json_decode(file_get_contents('php://input'), true);
-            createFamilyInfo($db, $user, $input);
+            $action = $input['action'] ?? '';
+            if ($action === 'update_member') {
+                updateMember($db, $user, $input);
+            } elseif ($action === 'delete_member') {
+                deleteMember($db, $user, $input);
+            } elseif ($action === 'add_birthday') {
+                addBirthdayAlert($db, $user, $input);
+            } else {
+                createFamilyInfo($db, $user, $input);
+            }
             break;
         case 'PUT':
             $input = json_decode(file_get_contents('php://input'), true);
@@ -186,6 +195,116 @@ function deleteFamilyInfo($db, $user, $infoId) {
     }
 
     jsonResponse(['message' => '资料已删除']);
+}
+
+/**
+ * 更新家庭成员（仅爸爸）
+ */
+function updateMember($db, $user, $input) {
+    if ($user['member_id'] !== 'p_dad') {
+        jsonResponse(['error' => '只有爸爸可以管理成员账号'], 403);
+    }
+
+    $memberId = intval($input['member_id'] ?? 0);
+    $username = trim($input['username'] ?? '');
+    $password = $input['password'] ?? '';
+
+    if ($memberId <= 0) {
+        jsonResponse(['error' => '无效的成员ID'], 400);
+    }
+
+    // 验证成员属于同一家庭
+    $stmt = $db->prepare('SELECT * FROM users WHERE id = ? AND family_id = ?');
+    $stmt->execute([$memberId, $user['family_id']]);
+    $member = $stmt->fetch();
+    if (!$member) {
+        jsonResponse(['error' => '成员不存在'], 404);
+    }
+
+    if (empty($username)) {
+        jsonResponse(['error' => '姓名不能为空'], 400);
+    }
+
+    // 如果要改密码
+    if (!empty($password)) {
+        if (strlen($password) < 6) {
+            jsonResponse(['error' => '密码至少6位'], 400);
+        }
+        $hash = password_hash($password, PASSWORD_BCRYPT);
+        $stmt = $db->prepare('UPDATE users SET username = ?, password_hash = ? WHERE id = ?');
+        $stmt->execute([$username, $hash, $memberId]);
+    } else {
+        $stmt = $db->prepare('UPDATE users SET username = ? WHERE id = ?');
+        $stmt->execute([$username, $memberId]);
+    }
+
+    jsonResponse(['message' => '成员信息已更新']);
+}
+
+/**
+ * 删除家庭成员（仅爸爸，不能删除自己）
+ */
+function deleteMember($db, $user, $input) {
+    if ($user['member_id'] !== 'p_dad') {
+        jsonResponse(['error' => '只有爸爸可以管理成员账号'], 403);
+    }
+
+    $memberId = intval($input['member_id'] ?? 0);
+
+    if ($memberId <= 0) {
+        jsonResponse(['error' => '无效的成员ID'], 400);
+    }
+
+    if ($memberId === $user['id']) {
+        jsonResponse(['error' => '不能删除自己的账号'], 400);
+    }
+
+    // 验证成员属于同一家庭
+    $stmt = $db->prepare('SELECT * FROM users WHERE id = ? AND family_id = ?');
+    $stmt->execute([$memberId, $user['family_id']]);
+    if (!$stmt->fetch()) {
+        jsonResponse(['error' => '成员不存在'], 404);
+    }
+
+    $stmt = $db->prepare('DELETE FROM users WHERE id = ? AND family_id = ?');
+    $stmt->execute([$memberId, $user['family_id']]);
+
+    jsonResponse(['message' => '成员已删除']);
+}
+
+/**
+ * 快速添加生日（从家庭资料添加并返回提醒）
+ */
+function addBirthdayAlert($db, $user, $input) {
+    if (!in_array($user['member_id'], ['p_dad', 'p_mom'])) {
+        jsonResponse(['error' => '权限不足'], 403);
+    }
+
+    $title = trim($input['title'] ?? '');
+    $content = trim($input['content'] ?? ''); // 日期 YYYY-MM-DD
+
+    if (empty($title) || empty($content)) {
+        jsonResponse(['error' => '姓名和日期不能为空'], 400);
+    }
+
+    $stmt = $db->prepare('
+        INSERT INTO family_info (family_id, category, title, content, remind_days, created_by)
+        VALUES (?, \'birthday\', ?, ?, 7, ?)
+    ');
+    $stmt->execute([$user['family_id'], $title, $content, $user['id']]);
+
+    $birthdayId = $db->lastInsertId();
+    $daysUntil = calculateDaysUntil($content);
+
+    jsonResponse([
+        'message' => '生日已添加',
+        'info' => [
+            'id' => $birthdayId,
+            'title' => $title,
+            'content' => $content,
+            'days_until' => $daysUntil
+        ]
+    ]);
 }
 
 /**

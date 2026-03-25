@@ -234,6 +234,12 @@
         .event-legend { display: flex; gap: 12px; flex-wrap: wrap; padding: 8px 0; }
         .event-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-light); }
         .event-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Birthday banner */
+        .birthday-banner { background: linear-gradient(135deg, #e91e63, #f48fb1); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; color: white; }
+        .birthday-banner-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+        .birthday-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; }
+        .tag-soon { background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 10px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -429,7 +435,23 @@
     <!-- Toast -->
     <div id="toast" class="toast" style="display:none"></div>
 
-    <script src="js/api.js"></script>
+    <!-- 成员编辑弹窗 -->
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <div class="modal-header"><span id="memberModalTitle">编辑成员</span><span class="close-btn" onclick="closeMemberModal()">✕</span></div>
+            <input type="hidden" id="editMemberId">
+            <div class="form-group"><label>成员姓名</label><input type="text" id="editMemberName" placeholder="输入新姓名"></div>
+            <div class="form-group"><label>新密码（如需修改）</label><input type="password" id="editMemberPass" placeholder="留空则不修改密码" autocomplete="new-password"></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteMemberBtn" onclick="confirmDeleteMember()" style="display:none">删除</button>
+                <div style="flex:1"></div>
+                <button class="btn btn-outline" onclick="closeMemberModal()">取消</button>
+                <button class="btn" onclick="saveMember()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js?v=20260325"></script>
     <script>
         // ========== 全局状态 ==========
         let currentPage = 'home';
@@ -921,7 +943,26 @@
 
         async function loadCalendarPage() {
             const canOperate = Api.canOperate();
-            let html = '<div class="calendar-wrap">';
+            let html = '';
+
+            // 生日提醒横幅（显示30天内即将到来的生日）
+            try {
+                const fd = await Api.family.list('birthday');
+                const upcoming = (fd.info || []).filter(b => (b.days_until ?? 999) <= 30).sort((a, b) => (a.days_until || 999) - (b.days_until || 999));
+                if (upcoming.length > 0) {
+                    html += '<div class="birthday-banner">';
+                    html += '<div class="birthday-banner-title">🎂 近期生日</div>';
+                    upcoming.forEach(b => {
+                        const isToday = b.days_until === 0;
+                        const isSoon = b.days_until <= 7;
+                        const tag = isToday ? '<span class="tag" style="background:var(--danger)">今天！</span>' : '<span class="tag tag-soon">' + b.days_until + '天后</span>';
+                        html += '<div class="birthday-item"><span>🎂 ' + escapeHtml(b.title) + '</span>' + tag + '</div>';
+                    });
+                    html += '</div>';
+                }
+            } catch {}
+
+            html += '<div class="calendar-wrap">';
 
             // 月份导航
             const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
@@ -1122,36 +1163,32 @@
             let html = '';
 
             if (canManageMembers) {
-                // 爸爸：成员账号管理
+                // 爸爸：成员账号管理（可编辑姓名/密码/删除）
                 html += '<div class="section-title">👨‍👩‍👧 成员账号管理</div>';
-                html += '<div class="card">';
-                html += '<div class="form-group"><label>添加成员</label>';
-                html += '<input type="text" id="memberName" placeholder="成员名称">';
-                html += '<select id="memberRole" style="margin-top:8px"><option value="child">孩子</option><option value="parent">家长</option></select>';
-                html += '<input type="password" id="memberPass" placeholder="设置密码（至少6位）" style="margin-top:8px">';
-                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="doCreateMember()">添加</button></div></div>';
-
                 try {
                     const fd = await Api.family.list();
                     const parents = (fd.members || []).filter(m => m.role === 'parent');
                     const children = (fd.members || []).filter(m => m.role === 'child');
+
                     if (parents.length > 0) {
-                        html += '<div style="margin-top:8px"><strong style="font-size:13px;color:var(--text-light)">家长</strong></div>';
+                        html += '<div style="margin-bottom:4px"><strong style="font-size:13px;color:var(--text-light)">家长</strong></div>';
                         parents.forEach(m => {
-                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                            html += '<div style="font-weight:600">' + m.username + '</div>';
+                            html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">';
+                            html += '<div style="font-weight:600">' + escapeHtml(m.username) + '</div>';
+                            html += '<button class="btn btn-sm btn-ghost" onclick="openEditMember(' + m.id + ',\'' + escapeHtml(m.username) + '\',' + (m.id !== Api.user.id) + ')">编辑</button>';
                             html += '</div></div>';
                         });
                     }
                     if (children.length > 0) {
-                        html += '<div style="margin-top:8px"><strong style="font-size:13px;color:var(--text-light)">孩子</strong></div>';
+                        html += '<div style="margin:8px 0 4px"><strong style="font-size:13px;color:var(--text-light)">孩子</strong></div>';
                         children.forEach(c => {
-                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                            html += '<div><div style="font-weight:600">' + c.username + '</div><div style="font-size:13px;color:var(--text-light)">积分: ' + c.points + '</div></div>';
+                            html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">';
+                            html += '<div><div style="font-weight:600">' + escapeHtml(c.username) + '</div><div style="font-size:13px;color:var(--primary)">积分: ' + c.points + '</div></div>';
+                            html += '<button class="btn btn-sm btn-ghost" onclick="openEditMember(' + c.id + ',\'' + escapeHtml(c.username) + '\',true)">编辑</button>';
                             html += '</div></div>';
                         });
                     }
-                } catch (e) {}
+                } catch (e) { html += '<div class="card"><p style="color:var(--text-light)">加载失败</p></div>'; }
             }
 
             if (canOperate) {
@@ -1273,8 +1310,16 @@
         async function doAddBirthday() {
             const name = document.getElementById('birthdayName').value.trim();
             const date = document.getElementById('birthdayDate').value;
-            if (!name || !date) { showToast('请填写名称和日期', 'error'); return; }
-            try { await Api.family.create({ category: 'birthday', title: name, content: date }); showToast('生日已添加', 'success'); document.getElementById('birthdayName').value = ''; document.getElementById('birthdayDate').value = ''; loadFamilyInfo(); } catch (e) { showToast(e.message, 'error'); }
+            if (!name || !date) { showToast('请填写姓名和日期', 'error'); return; }
+            try {
+                const result = await Api.family.addBirthday(name, date);
+                showToast('生日已添加，距今还有 ' + result.info.days_until + ' 天', 'success');
+                document.getElementById('birthdayName').value = '';
+                document.getElementById('birthdayDate').value = '';
+                loadFamilyInfo();
+                // 如果当前在日历页，刷新日历
+                if (currentPage === 'calendar') loadCalendarPage();
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function doAddDocument() {
@@ -1287,6 +1332,44 @@
         async function doDeleteFamilyInfo(id) {
             if (!confirm('确定删除？')) return;
             try { await Api.family.delete(id); showToast('已删除', 'success'); loadFamilyInfo(); } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ========== 成员管理（爸爸专属）==========
+        function openEditMember(id, username, canDelete) {
+            document.getElementById('editMemberId').value = id;
+            document.getElementById('editMemberName').value = username;
+            document.getElementById('editMemberPass').value = '';
+            document.getElementById('memberModalTitle').textContent = '编辑成员';
+            document.getElementById('deleteMemberBtn').style.display = canDelete ? '' : 'none';
+            document.getElementById('memberModal').classList.add('show');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.remove('show');
+        }
+
+        async function saveMember() {
+            const id = parseInt(document.getElementById('editMemberId').value);
+            const name = document.getElementById('editMemberName').value.trim();
+            const pass = document.getElementById('editMemberPass').value;
+            if (!name) { showToast('姓名不能为空', 'error'); return; }
+            try {
+                await Api.family.updateMember(id, name, pass);
+                showToast('成员信息已更新', 'success');
+                closeMemberModal();
+                loadSettingsPage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function confirmDeleteMember() {
+            const id = parseInt(document.getElementById('editMemberId').value);
+            if (!confirm('确定删除该成员？此操作不可恢复。')) return;
+            try {
+                await Api.family.deleteMember(id);
+                showToast('成员已删除', 'success');
+                closeMemberModal();
+                loadSettingsPage();
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
         // ========== 工具函数 ==========

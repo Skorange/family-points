@@ -285,6 +285,42 @@ const Api = {
             return Api.request(`family.php?id=${infoId}`, {
                 method: 'DELETE'
             });
+        },
+
+        // 更新成员（爸爸专属）
+        async updateMember(memberId, username, password) {
+            return Api.request('family.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'update_member',
+                    member_id: memberId,
+                    username,
+                    password
+                })
+            });
+        },
+
+        // 删除成员（爸爸专属）
+        async deleteMember(memberId) {
+            return Api.request('family.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'delete_member',
+                    member_id: memberId
+                })
+            });
+        },
+
+        // 快速添加生日（爸妈）
+        async addBirthday(title, content) {
+            return Api.request('family.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'add_birthday',
+                    title,
+                    content
+                })
+            });
         }
     },
 
