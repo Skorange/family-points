@@ -1,0 +1,11 @@
+{
+  "name": "web",
+  "active": true,
+  "events": ["push"],
+  "config": {
+    "url": "https://pumpkin.skorange.com/webhook.php",
+    "content_type": "json",
+    "secret": "family_points_secret_2024",
+    "insecure_ssl": "0"
+  }
+}
