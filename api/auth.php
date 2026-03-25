@@ -90,6 +90,7 @@ function login($db, $input) {
         'user' => [
             'id' => $user['id'],
             'username' => $user['username'],
+            'member_id' => $user['member_id'] ?? '',
             'role' => $user['role'],
             'points' => $user['points'],
             'avatar' => $user['avatar'] ?? '',
@@ -232,6 +233,7 @@ function getProfile($db, $userData) {
         'user' => [
             'id' => $user['id'],
             'username' => $user['username'],
+            'member_id' => $user['member_id'] ?? '',
             'role' => $user['role'],
             'points' => $user['points'],
             'avatar' => $user['avatar'] ?? '',

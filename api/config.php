@@ -97,8 +97,9 @@ function generateToken($user) {
         'iat' => time(),
         'user' => [
             'id' => $user['id'],
-            'email' => $user['email'],
+            'email' => $user['email'] ?? null,
             'username' => $user['username'],
+            'member_id' => $user['member_id'] ?? '',
             'role' => $user['role'],
             'family_id' => $user['family_id']
         ]

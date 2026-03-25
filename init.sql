@@ -128,3 +128,20 @@ CREATE TABLE IF NOT EXISTS announcements (
     FOREIGN KEY (family_id) REFERENCES families(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 家庭日历事件表
+CREATE TABLE IF NOT EXISTS events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    family_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    event_date DATE NOT NULL,
+    category ENUM('birthday', 'event', 'travel', 'reward') DEFAULT 'event',
+    is_all_day TINYINT DEFAULT 1,
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_family (family_id),
+    INDEX idx_date (event_date),
+    FOREIGN KEY (family_id) REFERENCES families(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

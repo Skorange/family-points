@@ -58,8 +58,8 @@ function getAnnouncements($db, $user) {
     $stmt->execute([$user['family_id']]);
     $list = $stmt->fetchAll();
 
-    // 判断当前用户是否可以编辑（爸妈）
-    $canEdit = in_array($user['role'], ['parent']);
+    // 只有爸爸妈妈可以编辑公告（不含爷爷奶奶）
+    $canEdit = in_array($user['member_id'], ['p_dad', 'p_mom']);
 
     jsonResponse([
         'announcements' => $list,
@@ -68,12 +68,11 @@ function getAnnouncements($db, $user) {
 }
 
 /**
- * 创建公告（仅爸妈）
+ * 创建公告（仅爸爸妈妈）
  */
 function createAnnouncement($db, $user, $input) {
-    // 仅爸妈可以发布公告
-    if (!in_array($user['role'], ['parent'])) {
-        jsonResponse(['error' => '只有家长可以发布公告'], 403);
+    if (!in_array($user['member_id'], ['p_dad', 'p_mom'])) {
+        jsonResponse(['error' => '只有爸爸妈妈可以发布公告'], 403);
     }
 
     $title = trim($input['title'] ?? '');
@@ -103,11 +102,11 @@ function createAnnouncement($db, $user, $input) {
 }
 
 /**
- * 更新公告（仅爸妈）
+ * 更新公告（仅爸爸妈妈）
  */
 function updateAnnouncement($db, $user, $input) {
-    if (!in_array($user['role'], ['parent'])) {
-        jsonResponse(['error' => '只有家长可以修改公告'], 403);
+    if (!in_array($user['member_id'], ['p_dad', 'p_mom'])) {
+        jsonResponse(['error' => '只有爸爸妈妈可以修改公告'], 403);
     }
 
     $id = intval($input['id'] ?? 0);
@@ -133,11 +132,11 @@ function updateAnnouncement($db, $user, $input) {
 }
 
 /**
- * 删除公告（仅爸妈）
+ * 删除公告（仅爸爸妈妈）
  */
 function deleteAnnouncement($db, $user, $id) {
-    if (!in_array($user['role'], ['parent'])) {
-        jsonResponse(['error' => '只有家长可以删除公告'], 403);
+    if (!in_array($user['member_id'], ['p_dad', 'p_mom'])) {
+        jsonResponse(['error' => '只有爸爸妈妈可以删除公告'], 403);
     }
 
     if ($id <= 0) {

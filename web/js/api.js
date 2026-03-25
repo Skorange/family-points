@@ -210,6 +210,32 @@ const Api = {
         }
     },
 
+    // 家庭日历事件
+    events: {
+        async list(year, month) {
+            const y = year || new Date().getFullYear();
+            const m = month || (new Date().getMonth() + 1);
+            return Api.request('events.php?year=' + y + '&month=' + m);
+        },
+        async create(data) {
+            return Api.request('events.php', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+        },
+        async update(data) {
+            return Api.request('events.php', {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+        },
+        async delete(id) {
+            return Api.request('events.php?id=' + id, {
+                method: 'DELETE'
+            });
+        }
+    },
+
     // 家庭公告
     announce: {
         async list() {
@@ -286,5 +312,26 @@ const Api = {
     // 检查是否是家长
     isParent() {
         return this.user?.role === 'parent';
+    },
+
+    // 权限判断（基于 member_id）
+    isDad() {
+        return this.user?.member_id === 'p_dad';
+    },
+
+    // 爸妈可操作（创建任务/奖励/审批/公告编辑等）
+    canOperate() {
+        const mid = this.user?.member_id;
+        return mid === 'p_dad' || mid === 'p_mom';
+    },
+
+    // 爸爸专属：成员账号管理
+    canManageMembers() {
+        return this.user?.member_id === 'p_dad';
+    },
+
+    // 是否为孩子
+    isChild() {
+        return this.user?.role === 'child';
     }
 };

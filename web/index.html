@@ -28,6 +28,8 @@
             min-height: 100vh;
             padding-bottom: 70px;
         }
+
+        /* Header */
         .header {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
@@ -36,16 +38,11 @@
             top: 0;
             z-index: 100;
         }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 18px; }
         .header .logout { color: white; font-size: 12px; opacity: 0.8; cursor: pointer; }
-        .header .logout:hover { opacity: 1; }
 
-        /* 导航栏 */
+        /* Nav */
         .nav {
             position: fixed;
             bottom: 0;
@@ -85,13 +82,13 @@
             justify-content: center;
         }
 
-        /* 页面内容 */
+        /* Page */
         .page { display: none; padding: 16px; padding-bottom: 80px; }
         .page.active { display: block; }
 
-        /* 公告 */
+        /* Announcement */
         .announcement-bar {
-            background: linear-gradient(135deg, #FF6B35, #FF8E53);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 12px;
             padding: 14px 16px;
             margin-bottom: 12px;
@@ -102,66 +99,49 @@
         .announcement-bar .ann-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
         .announcement-bar .ann-content { font-size: 13px; opacity: 0.9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .announcement-bar .ann-time { font-size: 11px; opacity: 0.7; margin-top: 6px; }
-        .announcement-bar .ann-edit {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 12px;
-            opacity: 0.8;
-            background: rgba(255,255,255,0.2);
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-        .announcement-bar.pinned {
-            border: 2px solid rgba(255,255,255,0.5);
-        }
-        .announcement-empty {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            color: var(--text-light);
-            font-size: 13px;
-            text-align: center;
-            cursor: pointer;
-        }
+        .announcement-bar .ann-edit { position: absolute; top: 10px; right: 10px; font-size: 12px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; }
+        .announcement-bar.pinned { border: 2px solid rgba(255,255,255,0.5); }
+        .announcement-empty { background: var(--white); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; color: var(--text-light); font-size: 13px; text-align: center; cursor: pointer; }
 
-        /* 卡片 */
-        .card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+        /* Calendar */
+        .calendar-wrap { background: var(--white); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .cal-header .cal-title { font-size: 15px; font-weight: 600; }
+        .cal-header .cal-nav { display: flex; gap: 8px; }
+        .cal-header .cal-nav button { background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; color: var(--primary); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+        .cal-weekday { font-size: 11px; color: var(--text-light); padding: 4px 0; }
+        .cal-day { font-size: 13px; padding: 6px 2px; border-radius: 50%; cursor: pointer; position: relative; }
+        .cal-day:hover { background: #f0f0f0; }
+        .cal-day.today { background: var(--primary); color: white; font-weight: bold; }
+        .cal-day.other-month { color: #ccc; }
+        .cal-day.has-event::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--primary); }
+        .cal-day.selected { background: #fff3ee; border: 2px solid var(--primary); }
+        .cal-events { margin-top: 12px; }
+        .cal-event-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .cal-event-item:last-child { border-bottom: none; }
+        .cal-event-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .cal-event-dot.travel { background: #2196F3; }
+        .cal-event-dot.event { background: var(--primary); }
+        .cal-event-dot.birthday { background: #e91e63; }
+        .cal-event-dot.reward { background: #9C27B0; }
+        .cal-event-date { font-size: 12px; color: var(--text-light); min-width: 40px; }
+        .cal-event-title { font-size: 13px; flex: 1; }
+        .cal-no-events { font-size: 13px; color: var(--text-light); padding: 8px 0; text-align: center; }
+
+        /* Card */
+        .card { background: var(--white); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
         .card-meta { font-size: 13px; color: var(--text-light); margin-bottom: 4px; }
 
-        /* 积分显示 */
-        .points-big {
-            text-align: center;
-            padding: 30px 20px;
-        }
+        /* Points */
+        .points-big { text-align: center; padding: 30px 20px; }
         .points-big .label { font-size: 14px; color: var(--text-light); }
         .points-big .value { font-size: 56px; color: var(--primary); font-weight: bold; line-height: 1.2; }
         .points-big .unit { font-size: 20px; color: var(--primary-light); }
 
-        /* 按钮 */
-        .btn {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            text-align: center;
-        }
+        /* Buttons */
+        .btn { display: inline-block; background: var(--primary); color: white; padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; text-align: center; }
         .btn:hover { opacity: 0.9; }
         .btn-block { width: 100%; }
         .btn-sm { padding: 8px 12px; font-size: 13px; }
@@ -170,230 +150,90 @@
         .btn-danger { background: var(--danger); }
         .btn-ghost { background: transparent; color: var(--text-light); }
 
-        /* 标签 */
-        .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            background: #fff3e0;
-            color: var(--primary);
-        }
+        /* Tag */
+        .tag { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; background: #fff3e0; color: var(--primary); }
         .tag-success { background: #e8f5e9; color: var(--success); }
         .tag-danger { background: #ffebee; color: var(--danger); }
         .tag-pending { background: #fff8e1; color: #f9a825; }
 
-        /* 列表项 */
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border);
-        }
+        /* List item */
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
         .list-item:last-child { border-bottom: none; }
 
-        /* 表单 */
+        /* Form */
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 14px; color: var(--text-light); margin-bottom: 6px; }
         .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            transition: border-color 0.2s;
+            width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px;
+            font-size: 16px; font-family: inherit; transition: border-color 0.2s;
         }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
 
-        /* 模态框 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 200;
-            align-items: flex-end;
-        }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: flex-end; }
         .modal.show { display: flex; }
-        .modal-content {
-            background: var(--white);
-            width: 100%;
-            border-radius: 16px 16px 0 0;
-            padding: 20px;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .modal-header {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .modal-content { background: var(--white); width: 100%; border-radius: 16px 16px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-header { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .modal-header .close-btn { font-size: 20px; color: var(--text-light); cursor: pointer; }
         .modal-footer { display: flex; gap: 12px; margin-top: 20px; }
         .modal-footer .btn { flex: 1; }
 
         /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 300;
-            animation: fadeIn 0.3s;
-            max-width: 360px;
-            text-align: center;
-        }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 300; animation: fadeIn 0.3s; max-width: 360px; text-align: center; }
         .toast.error { background: var(--danger); }
         .toast.success { background: var(--success); }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
 
-        /* 空状态 */
-        .empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-        }
+        /* Empty */
+        .empty { text-align: center; padding: 40px 20px; color: var(--text-light); }
         .empty .icon { font-size: 48px; margin-bottom: 12px; }
 
-        /* 分割线标题 */
-        .section-title {
-            font-size: 14px;
-            color: var(--text-light);
-            margin: 20px 0 12px;
-            padding-left: 8px;
-            border-left: 3px solid var(--primary);
-        }
+        /* Section title */
+        .section-title { font-size: 14px; color: var(--text-light); margin: 20px 0 12px; padding-left: 8px; border-left: 3px solid var(--primary); }
 
-        /* 数字卡片 */
-        .stat-card {
-            text-align: center;
-            padding: 16px;
-            background: var(--white);
-            border-radius: 12px;
-        }
+        /* Stat */
+        .stat-card { text-align: center; padding: 16px; background: var(--white); border-radius: 12px; }
         .stat-card .num { font-size: 28px; color: var(--primary); font-weight: bold; }
         .stat-card .label { font-size: 12px; color: var(--text-light); margin-top: 4px; }
 
-        /* 登录页 */
-        .login-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            padding: 20px;
-        }
-        .login-card {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 32px 24px;
-            width: 100%;
-            max-width: 320px;
-        }
+        /* Login */
+        .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--primary-light)); padding: 20px; }
+        .login-card { background: var(--white); border-radius: 16px; padding: 32px 24px; width: 100%; max-width: 320px; }
         .login-card h2 { text-align: center; font-size: 24px; color: var(--primary); margin-bottom: 4px; }
         .login-card .subtitle { text-align: center; color: var(--text-light); font-size: 13px; margin-bottom: 24px; }
-        .login-card select, .login-card input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 12px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: inherit;
-        }
-        .login-card select:focus, .login-card input:focus { outline: none; border-color: var(--primary); }
+        .login-card input { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px; font-family: inherit; }
+        .login-card input:focus { outline: none; border-color: var(--primary); }
         .login-card .hint { font-size: 12px; color: var(--text-light); text-align: center; margin-top: 16px; }
         .login-card .hint a { color: var(--primary); cursor: pointer; }
 
-        /* 浮动添加按钮 */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            font-size: 24px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255,107,53,0.4);
-            z-index: 50;
-            display: none;
-        }
+        /* FAB */
+        .fab { position: fixed; bottom: 80px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(255,107,53,0.4); z-index: 50; display: none; }
         .fab.show { display: block; }
 
-        /* 成员选择网格 */
-        .member-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        .member-btn {
-            padding: 16px 12px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--white);
-        }
+        /* Member grid */
+        .member-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .member-btn { padding: 16px 12px; border: 2px solid var(--border); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); }
         .member-btn:hover { border-color: var(--primary-light); }
         .member-btn.selected { border-color: var(--primary); background: #fff3ee; }
         .member-btn .avatar { font-size: 32px; margin-bottom: 4px; }
         .member-btn .name { font-size: 14px; font-weight: 600; }
         .member-btn .role { font-size: 11px; color: var(--text-light); }
 
-        /* 积分调整说明 */
-        .adjust-tip {
-            font-size: 11px;
-            color: var(--text-light);
-            background: #f9f9f9;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            line-height: 1.6;
-        }
-
-        /* 任务项操作按钮 */
-        .task-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-
-        /* 积分调整快捷按钮组 */
-        .adjust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .adjust-child {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .adjust-child .name { font-weight: 600; font-size: 15px; }
+        /* Adjust child row */
+        .adjust-child { background: var(--white); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .adjust-child .pts { color: var(--primary); font-weight: bold; font-size: 14px; }
         .adjust-btns { display: flex; gap: 4px; }
+
+        /* Category picker */
+        .cat-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .cat-picker .cat-btn { padding: 6px 14px; border-radius: 20px; border: 2px solid var(--border); background: var(--white); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .cat-picker .cat-btn.selected { border-color: var(--primary); background: #fff3ee; color: var(--primary); }
+
+        /* Event type legend */
+        .event-legend { display: flex; gap: 12px; flex-wrap: wrap; padding: 8px 0; }
+        .event-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-light); }
+        .event-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -402,16 +242,14 @@
         <div class="login-card">
             <h2>🎃 南瓜之家</h2>
             <p class="subtitle">家庭积分管理系统</p>
-
             <div id="memberSelectSection">
                 <div class="member-grid" id="memberGrid"></div>
                 <div id="pwdSection" style="display:none">
                     <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
                     <button class="btn btn-block" onclick="handleLogin()">进入</button>
                 </div>
-                <p class="hint">还没有账号？<a onclick="showSetup()" id="setupLink">初始化设置</a></p>
+                <p class="hint">首次使用请先 <a onclick="showSetup()">初始化设置</a></p>
             </div>
-
             <div id="setupSection" style="display:none">
                 <p class="subtitle" style="margin-bottom:16px">初始化家庭设置</p>
                 <div class="member-grid" id="setupMemberGrid"></div>
@@ -446,11 +284,10 @@
             <div class="nav-item" onclick="switchPage('shop')">
                 <span class="icon">🎁</span><span>商城</span>
             </div>
-            <div class="nav-item" onclick="switchPage('approve')" id="approveNav" style="display:none">
-                <span class="icon">📮</span><span>审批</span>
-                <span class="badge" id="approveBadge" style="display:none">0</span>
+            <div class="nav-item" onclick="switchPage('calendar')">
+                <span class="icon">📅</span><span>日历</span>
             </div>
-            <div class="nav-item" onclick="switchPage('settings')">
+            <div class="nav-item" onclick="switchPage('settings')" id="settingsNav">
                 <span class="icon">⚙️</span><span>我的</span>
             </div>
         </nav>
@@ -462,19 +299,19 @@
 
         <!-- 任务页 -->
         <div id="tasksPage" class="page">
-            <button class="fab" id="addTaskFab" style="display:none" onclick="showAddTask()">+</button>
+            <button class="fab" id="addTaskFab" onclick="showAddTask()">+</button>
             <div id="tasksContent"></div>
         </div>
 
         <!-- 商城页 -->
         <div id="shopPage" class="page">
-            <button class="fab" id="addRewardFab" style="display:none" onclick="showAddReward()">+</button>
+            <button class="fab" id="addRewardFab" onclick="showAddReward()">+</button>
             <div id="shopContent"></div>
         </div>
 
-        <!-- 审批页（家长） -->
-        <div id="approvePage" class="page">
-            <div id="approveContent"></div>
+        <!-- 日历页 -->
+        <div id="calendarPage" class="page">
+            <div id="calendarContent"></div>
         </div>
 
         <!-- 我的页 -->
@@ -483,7 +320,8 @@
         </div>
     </div>
 
-    <!-- 添加任务模态框 -->
+    <!-- 模态框们 -->
+    <!-- 任务 -->
     <div class="modal" id="taskModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -491,24 +329,14 @@
                 <span class="close-btn" onclick="closeTaskModal()">✕</span>
             </div>
             <input type="hidden" id="editTaskId">
-            <div class="form-group">
-                <label>任务名称 *</label>
-                <input type="text" id="taskName" placeholder="例如：整理房间、按时睡觉">
-            </div>
-            <div class="form-group">
-                <label>描述（可选）</label>
-                <textarea id="taskDesc" rows="2" placeholder="任务要求说明"></textarea>
-            </div>
-            <div class="form-group">
-                <label>积分奖励 *</label>
-                <input type="number" id="taskPoints" value="10" min="1" max="500">
-            </div>
-            <div class="form-group">
-                <label>重复类型</label>
+            <div class="form-group"><label>任务名称 *</label><input type="text" id="taskName" placeholder="例如：整理房间"></div>
+            <div class="form-group"><label>描述（可选）</label><textarea id="taskDesc" rows="2" placeholder="任务要求"></textarea></div>
+            <div class="form-group"><label>积分奖励 *</label><input type="number" id="taskPoints" value="10" min="1" max="500"></div>
+            <div class="form-group"><label>重复类型</label>
                 <select id="taskRepeat">
-                    <option value="once">一次性（做完不可重复）</option>
-                    <option value="daily">每日（每天可做一次）</option>
-                    <option value="weekly">每周（每周可做一次）</option>
+                    <option value="once">一次性</option>
+                    <option value="daily">每日</option>
+                    <option value="weekly">每周</option>
                 </select>
             </div>
             <div class="modal-footer">
@@ -518,25 +346,13 @@
         </div>
     </div>
 
-    <!-- 添加奖励模态框 -->
+    <!-- 奖励 -->
     <div class="modal" id="rewardModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>添加奖励</span>
-                <span class="close-btn" onclick="closeRewardModal()">✕</span>
-            </div>
-            <div class="form-group">
-                <label>奖励名称 *</label>
-                <input type="text" id="rewardName" placeholder="例如：游戏时间30分钟">
-            </div>
-            <div class="form-group">
-                <label>描述说明（可选）</label>
-                <textarea id="rewardDesc" rows="2" placeholder="奖励内容描述"></textarea>
-            </div>
-            <div class="form-group">
-                <label>所需积分 *</label>
-                <input type="number" id="rewardCost" value="50" min="1">
-            </div>
+            <div class="modal-header"><span>添加奖励</span><span class="close-btn" onclick="closeRewardModal()">✕</span></div>
+            <div class="form-group"><label>奖励名称 *</label><input type="text" id="rewardName" placeholder="例如：游戏时间30分钟"></div>
+            <div class="form-group"><label>描述说明</label><textarea id="rewardDesc" rows="2" placeholder="奖励内容描述"></textarea></div>
+            <div class="form-group"><label>所需积分 *</label><input type="number" id="rewardCost" value="50" min="1"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeRewardModal()">取消</button>
                 <button class="btn" onclick="saveReward()">保存</button>
@@ -544,50 +360,57 @@
         </div>
     </div>
 
-    <!-- 发布公告模态框 -->
+    <!-- 公告 -->
     <div class="modal" id="announceModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span id="announceModalTitle">发布公告</span>
-                <span class="close-btn" onclick="closeAnnounceModal()">✕</span>
-            </div>
+            <div class="modal-header"><span id="announceModalTitle">发布公告</span><span class="close-btn" onclick="closeAnnounceModal()">✕</span></div>
             <input type="hidden" id="editAnnounceId">
-            <div class="form-group">
-                <label>公告标题 *</label>
-                <input type="text" id="announceTitle" placeholder="例如：本周任务调整、旅游计划">
-            </div>
-            <div class="form-group">
-                <label>公告内容</label>
-                <textarea id="announceContent" rows="5" placeholder="详细说明..."></textarea>
-            </div>
+            <div class="form-group"><label>公告标题 *</label><input type="text" id="announceTitle" placeholder="公告主题"></div>
+            <div class="form-group"><label>公告内容</label><textarea id="announceContent" rows="4" placeholder="详细内容..."></textarea></div>
             <div class="form-group" style="display:flex;align-items:center;gap:8px">
                 <input type="checkbox" id="announcePinned" style="width:auto">
                 <label style="margin:0;font-size:14px">置顶公告</label>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeAnnounceModal()">取消</button>
-                <button class="btn" onclick="saveAnnouncement()">发布</button>
+                <button class="btn" id="announceSaveBtn" onclick="saveAnnouncement()">发布</button>
             </div>
         </div>
     </div>
 
-    <!-- 积分调整模态框 -->
+    <!-- 日历事件 -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header"><span id="eventModalTitle">添加日程</span><span class="close-btn" onclick="closeEventModal()">✕</span></div>
+            <input type="hidden" id="editEventId">
+            <div class="form-group"><label>日程标题 *</label><input type="text" id="eventTitle" placeholder="例如：暑假海南游"></div>
+            <div class="form-group"><label>日期 *</label><input type="date" id="eventDate"></div>
+            <div class="form-group"><label>类型</label>
+                <div class="cat-picker" id="eventCatPicker">
+                    <button class="cat-btn selected" data-val="event" onclick="pickEventCat(this)">📌 普通</button>
+                    <button class="cat-btn" data-val="travel" onclick="pickEventCat(this)">✈️ 旅游</button>
+                    <button class="cat-btn" data-val="birthday" onclick="pickEventCat(this)">🎂 生日</button>
+                    <button class="cat-btn" data-val="reward" onclick="pickEventCat(this)">🎁 奖励</button>
+                </div>
+                <input type="hidden" id="eventCategory" value="event">
+            </div>
+            <div class="form-group"><label>备注</label><textarea id="eventDesc" rows="3" placeholder="详细说明..."></textarea></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="eventDeleteBtn" style="display:none;flex:0.5" onclick="deleteEvent()">删除</button>
+                <button class="btn btn-outline" onclick="closeEventModal()">取消</button>
+                <button class="btn" onclick="saveEvent()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 积分调整 -->
     <div class="modal" id="adjustModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span id="adjustModalTitle">调整积分</span>
-                <span class="close-btn" onclick="closeAdjustModal()">✕</span>
-            </div>
+            <div class="modal-header"><span>调整积分</span><span class="close-btn" onclick="closeAdjustModal()">✕</span></div>
             <input type="hidden" id="adjustUserId">
             <div id="adjustChildName" style="font-weight:600;font-size:16px;margin-bottom:16px;text-align:center"></div>
-            <div class="form-group">
-                <label>调整积分 *</label>
-                <input type="number" id="adjustAmount" value="10" min="1" max="500">
-            </div>
-            <div class="form-group">
-                <label>原因说明 *</label>
-                <input type="text" id="adjustNote" placeholder="例如：主动帮忙洗碗、积极写作业">
-            </div>
+            <div class="form-group"><label>调整积分 *</label><input type="number" id="adjustAmount" value="10" min="1"></div>
+            <div class="form-group"><label>原因说明 *</label><input type="text" id="adjustNote" placeholder="例如：主动帮忙洗碗"></div>
             <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
                 <button class="btn btn-sm btn-success" onclick="setAdjustVal(10)">+10</button>
                 <button class="btn btn-sm btn-success" onclick="setAdjustVal(20)">+20</button>
@@ -608,12 +431,11 @@
 
     <script src="js/api.js"></script>
     <script>
+        // ========== 全局状态 ==========
         let currentPage = 'home';
-        let isParent = false;
         let selectedMemberId = null;
         let selectedMemberName = '';
         let setupSelectedMember = null;
-        let familyMembers = [];
 
         // ========== 初始化 ==========
         document.addEventListener('DOMContentLoaded', async () => {
@@ -639,33 +461,28 @@
                 const data = await Api.auth.getProfile();
                 Api.setAuth(Api.token, data.user);
                 return true;
-            } catch {
-                return false;
-            }
+            } catch { return false; }
         }
 
-        // ========== 成员选择登录 ==========
-        async function loadMemberList() {
+        // ========== 成员选择 ==========
+        function loadMemberList() {
             const grid = document.getElementById('memberGrid');
             const setupGrid = document.getElementById('setupMemberGrid');
-
-            // 预设家庭成员
-            familyMembers = [
+            const members = [
                 { id: 'p_dad',     username: '爸爸',    role: 'parent', avatar: '👨' },
                 { id: 'p_mom',     username: '妈妈',    role: 'parent', avatar: '👩' },
                 { id: 'p_grandpa', username: '爷爷',    role: 'parent', avatar: '👴' },
                 { id: 'p_grandma', username: '奶奶',    role: 'parent', avatar: '👵' },
                 { id: 'c_pumpkin', username: '小南瓜',  role: 'child',  avatar: '🎃' },
-                { id: 'c_chestnut', username: '小栗子', role: 'child', avatar: '🌰' },
+                { id: 'c_chestnut', username: '小栗子', role: 'child',  avatar: '🌰' },
             ];
-
-            renderMemberGrid(grid, familyMembers, false);
+            renderGrid(grid, members, false);
+            renderGrid(setupGrid, members, true);
             document.getElementById('memberSelectSection').style.display = 'block';
             document.getElementById('setupSection').style.display = 'none';
-            renderMemberGrid(setupGrid, familyMembers, true);
         }
 
-        function renderMemberGrid(container, members, isSetup) {
+        function renderGrid(container, members, isSetup) {
             container.innerHTML = members.map(m => `
                 <div class="member-btn" data-id="${m.id}" data-role="${m.role}" data-name="${m.username}" data-avatar="${m.avatar}">
                     <div class="avatar">${m.avatar}</div>
@@ -673,34 +490,27 @@
                     <div class="role">${m.role === 'parent' ? '家长' : '孩子'}</div>
                 </div>
             `).join('');
-
             container.querySelectorAll('.member-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     container.querySelectorAll('.member-btn').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
-                    const id = btn.dataset.id;
-                    const role = btn.dataset.role;
-                    const name = btn.dataset.name;
-
+                    const id = btn.dataset.id, role = btn.dataset.role, name = btn.dataset.name;
                     if (isSetup) {
-                        setupSelectedMember = { id, role, name, avatar: btn.dataset.avatar };
+                        setupSelectedMember = { id, role, name };
                         document.getElementById('setupPwdSection').style.display = 'block';
-                        document.getElementById('setupPassword').focus();
                     } else {
-                        selectedMemberId = id;
-                        selectedMemberName = name;
+                        selectedMemberId = id; selectedMemberName = name;
                         document.getElementById('pwdSection').style.display = 'block';
-                        document.getElementById('loginPassword').focus();
                     }
                 });
             });
         }
 
         async function handleLogin() {
-            const password = document.getElementById('loginPassword').value;
-            if (!selectedMemberId || !password) { showToast('请选择成员并输入密码', 'error'); return; }
+            const pw = document.getElementById('loginPassword').value;
+            if (!selectedMemberId || !pw) { showToast('请选择成员并输入密码', 'error'); return; }
             try {
-                const data = await Api.auth.loginByMember(selectedMemberId, password);
+                const data = await Api.auth.loginByMember(selectedMemberId, pw);
                 showApp();
                 showToast('欢迎，' + data.user.username + '！', 'success');
             } catch (e) { showToast(e.message, 'error'); }
@@ -713,12 +523,7 @@
             if (pw1.length < 6) { showToast('密码至少6位', 'error'); return; }
             if (pw1 !== pw2) { showToast('两次密码不一致', 'error'); return; }
             try {
-                const data = await Api.auth.setupFamily({
-                    member_id: setupSelectedMember.id,
-                    member_name: setupSelectedMember.name,
-                    role: setupSelectedMember.role,
-                    password: pw1
-                });
+                await Api.auth.setupFamily({ member_id: setupSelectedMember.id, member_name: setupSelectedMember.name, role: setupSelectedMember.role, password: pw1 });
                 showApp();
                 showToast('初始化成功！', 'success');
             } catch (e) { showToast(e.message, 'error'); }
@@ -728,38 +533,29 @@
             document.getElementById('memberSelectSection').style.display = 'none';
             document.getElementById('setupSection').style.display = 'block';
         }
-
         function showMemberSelect() {
             document.getElementById('setupSection').style.display = 'none';
             document.getElementById('memberSelectSection').style.display = 'block';
             setupSelectedMember = null;
         }
 
-        // ========== 应用主视图 ==========
+        // ========== 主视图 ==========
         function showApp() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'block';
-            isParent = Api.isParent();
             const user = Api.user;
-            const roleText = { parent: '家长', child: '孩子' }[user.role] || '成员';
-            document.getElementById('userInfo').textContent = user.username + ' · ' + roleText;
-
-            // 重置页面状态
+            const roleMap = { parent: '家长', child: '孩子' };
+            document.getElementById('userInfo').textContent = user.username + ' · ' + (roleMap[user.role] || '成员');
             currentPage = 'home';
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelector('.nav-item').classList.add('active');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('homePage').classList.add('active');
-
             loadPage();
         }
 
-        function doLogout() {
-            Api.logout();
-            location.reload();
-        }
+        function doLogout() { Api.logout(); location.reload(); }
 
-        // ========== 页面切换 ==========
         function switchPage(page) {
             currentPage = page;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -770,19 +566,22 @@
         }
 
         async function loadPage() {
-            // 家长专属按钮
+            // 权限控制
+            const canOperate = Api.canOperate();       // 爸妈可操作
+            const canManageMembers = Api.canManageMembers(); // 爸爸专属
+            const isChild = Api.isChild();
+
+            // FAB按钮（爸妈可见）
             const fab1 = document.getElementById('addTaskFab');
             const fab2 = document.getElementById('addRewardFab');
-            const navApprove = document.getElementById('approveNav');
-            if (fab1) fab1.classList.toggle('show', isParent);
-            if (fab2) fab2.classList.toggle('show', isParent);
-            if (navApprove) navApprove.style.display = isParent ? 'flex' : 'none';
+            if (fab1) fab1.classList.toggle('show', canOperate);
+            if (fab2) fab2.classList.toggle('show', canOperate);
 
             switch (currentPage) {
                 case 'home': await loadHomePage(); break;
                 case 'tasks': await loadTasksPage(); break;
                 case 'shop': await loadShopPage(); break;
-                case 'approve': await loadApprovePage(); break;
+                case 'calendar': await loadCalendarPage(); break;
                 case 'settings': await loadSettingsPage(); break;
             }
         }
@@ -790,59 +589,72 @@
         // ========== 首页 ==========
         async function loadHomePage() {
             let html = '';
+            const canOperate = Api.canOperate();
 
-            // 公告区域
+            // 公告
             html += await loadAnnouncementBar();
 
             try {
-                const rankData = await Api.points.ranking();
-                const allMembers = rankData.ranking || [];
+                const [rankData, pendingData] = await Promise.all([
+                    Api.points.ranking(),
+                    Api.rewards.pendingApprovals()
+                ]);
+                const children = (rankData.ranking || []).filter(m => m.role === 'child');
+                const pendingCount = (pendingData.pending || []).length;
 
-                if (isParent) {
-                    const children = allMembers.filter(m => m.role === 'child');
+                if (canOperate) {
                     html += '<div class="card"><div class="card-title">📊 家庭概览</div>';
                     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">';
                     html += '<div class="stat-card"><div class="num">' + children.length + '</div><div class="label">孩子数量</div></div>';
-                    const pending = await Api.rewards.pendingApprovals();
-                    html += '<div class="stat-card"><div class="num" style="color:var(--danger)">' + ((pending.pending || []).length) + '</div><div class="label">待审批</div></div>';
+                    html += '<div class="stat-card"><div class="num" style="color:var(--danger)">' + pendingCount + '</div><div class="label">待审批</div></div>';
                     html += '</div></div>';
 
                     if (children.length > 0) {
                         html += '<div class="section-title">孩子积分</div>';
                         children.forEach(c => {
-                            html += '<div class="card">';
-                            html += '<div class="adjust-child">';
-                            html += '<div><div class="name">' + c.username + '</div><div class="pts">' + c.points + ' 分</div></div>';
+                            html += '<div class="card"><div class="adjust-child">';
+                            html += '<div><div style="font-weight:600">' + c.username + '</div><div class="pts">' + c.points + ' 分</div></div>';
                             html += '<div class="adjust-btns">';
-                            html += '<button class="btn btn-sm btn-success" onclick="openAdjustModal(' + c.id + ', \'' + c.username + '\', 10)">+10</button>';
-                            html += '<button class="btn btn-sm btn-success" onclick="openAdjustModal(' + c.id + ', \'' + c.username + '\', 50)">+50</button>';
-                            html += '<button class="btn btn-sm btn-danger" onclick="openAdjustModal(' + c.id + ', \'' + c.username + '\', -10)">-10</button>';
+                            html += '<button class="btn btn-sm btn-success" onclick="openAdjustModal(' + c.id + ',\'' + c.username + '\',10)">+10</button>';
+                            html += '<button class="btn btn-sm btn-success" onclick="openAdjustModal(' + c.id + ',\'' + c.username + '\',50)">+50</button>';
+                            html += '<button class="btn btn-sm btn-danger" onclick="openAdjustModal(' + c.id + ',\'' + c.username + '\',-10)">-10</button>';
                             html += '</div></div></div>';
                         });
                     }
                 } else {
-                    const pointsData = await Api.points.history();
-                    html += '<div class="card points-big">';
-                    html += '<div class="label">我的积分</div>';
-                    html += '<div class="value">' + pointsData.current_points + '<span class="unit">分</span></div>';
-                    html += '</div>';
+                    // 爷爷奶奶 / 孩子：只看积分
+                    if (Api.isChild()) {
+                        const pts = await Api.points.history();
+                        html += '<div class="card points-big">';
+                        html += '<div class="label">我的积分</div>';
+                        html += '<div class="value">' + pts.current_points + '<span class="unit">分</span></div>';
+                        html += '</div>';
+                    } else {
+                        // 爷爷奶奶：只看孩子积分
+                        if (children.length > 0) {
+                            html += '<div class="section-title">孩子积分</div>';
+                            children.forEach(c => {
+                                html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">';
+                                html += '<div style="font-weight:600">' + c.username + '</div>';
+                                html += '<div style="font-size:24px;color:var(--primary);font-weight:bold">' + c.points + ' <span style="font-size:14px">分</span></div>';
+                                html += '</div></div>';
+                            });
+                        }
+                    }
                 }
 
                 // 积分排行（孩子）
-                const childMembers = allMembers.filter(m => m.role === 'child');
-                if (childMembers.length > 0) {
-                    html += '<div class="section-title">🏆 积分排行</div>';
-                    html += '<div class="card">';
-                    childMembers.forEach((item, i) => {
+                if (children.length > 0) {
+                    html += '<div class="section-title">🏆 积分排行</div><div class="card">';
+                    children.forEach((item, i) => {
                         const medal = ['🥇','🥈','🥉'][i] || (i + 1) + '.';
                         html += '<div class="list-item">';
                         html += '<div><span style="margin-right:8px">' + medal + '</span>' + item.username + '</div>';
-                        html += '<div style="color:var(--primary);font-weight:600">' + item.points + '分</div>';
-                        html += '</div>';
+                        html += '<div style="color:var(--primary);font-weight:600">' + item.points + '分</div></div>';
                     });
                     html += '</div>';
                 }
-            } catch (e) { html += '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
+            } catch (e) { html += '<div class="card"><p style="color:var(--danger)">加载失败：' + e.message + '</p></div>'; }
 
             document.getElementById('homeContent').innerHTML = html;
         }
@@ -851,39 +663,29 @@
         async function loadAnnouncementBar() {
             try {
                 const data = await Api.announce.list();
-                const announcements = data.announcements || [];
+                const anns = data.announcements || [];
                 const canEdit = data.can_edit;
-
-                if (announcements.length === 0) {
-                    if (canEdit) {
-                        return '<div class="announcement-empty" onclick="openAddAnnounce()">📌 点击发布第一条公告</div>';
-                    } else {
-                        return '<div class="announcement-empty">📌 暂无公告</div>';
-                    }
+                if (anns.length === 0) {
+                    if (canEdit) return '<div class="announcement-empty" onclick="openAddAnnounce()">📌 点击发布第一条公告</div>';
+                    return '';
                 }
-
-                const top = announcements[0];
-                let html = '';
-                html += '<div class="announcement-bar' + (top.is_pinned ? ' pinned' : '') + '" onclick="openViewAnnounce(' + top.id + ')">';
-                if (canEdit) {
-                    html += '<span class="ann-edit" onclick="event.stopPropagation();openEditAnnounce(' + top.id + ')">编辑</span>';
-                }
-                html += '<div class="ann-title">' + (top.is_pinned ? '📌 ' : '') + top.title + '</div>';
-                if (top.content) {
-                    html += '<div class="ann-content">' + top.content + '</div>';
-                }
-                html += '<div class="ann-time">' + top.author_name + ' · ' + formatDate(top.created_at) + '</div>';
-                html += '</div>';
-                return html;
-            } catch (e) { return ''; }
+                const top = anns[0];
+                let h = '<div class="announcement-bar' + (top.is_pinned ? ' pinned' : '') + '" onclick="openViewAnnounce(' + top.id + ')">';
+                if (canEdit) h += '<span class="ann-edit" onclick="event.stopPropagation();openEditAnnounce(' + top.id + ')">编辑</span>';
+                h += '<div class="ann-title">' + (top.is_pinned ? '📌 ' : '') + escapeHtml(top.title) + '</div>';
+                if (top.content) h += '<div class="ann-content">' + escapeHtml(top.content) + '</div>';
+                h += '<div class="ann-time">' + escapeHtml(top.author_name) + ' · ' + formatDate(top.created_at) + '</div></div>';
+                return h;
+            } catch { return ''; }
         }
 
-        async function openAddAnnounce() {
+        function openAddAnnounce() {
             document.getElementById('announceModalTitle').textContent = '发布公告';
             document.getElementById('editAnnounceId').value = '';
             document.getElementById('announceTitle').value = '';
             document.getElementById('announceContent').value = '';
             document.getElementById('announcePinned').checked = false;
+            document.getElementById('announceSaveBtn').style.display = '';
             document.getElementById('announceModal').classList.add('show');
         }
 
@@ -897,8 +699,9 @@
                 document.getElementById('announceTitle').value = ann.title;
                 document.getElementById('announceContent').value = ann.content || '';
                 document.getElementById('announcePinned').checked = ann.is_pinned == 1;
+                document.getElementById('announceSaveBtn').style.display = '';
                 document.getElementById('announceModal').classList.add('show');
-            } catch (e) { showToast('加载公告失败', 'error'); }
+            } catch (e) { showToast('加载失败', 'error'); }
         }
 
         async function openViewAnnounce(id) {
@@ -911,22 +714,12 @@
                 document.getElementById('announceTitle').value = ann.title;
                 document.getElementById('announceContent').value = ann.content || '';
                 document.getElementById('announcePinned').checked = ann.is_pinned == 1;
+                document.getElementById('announceSaveBtn').style.display = 'none';
                 document.getElementById('announceModal').classList.add('show');
-                // 详情模式：禁用标题编辑
-                document.getElementById('announceTitle').disabled = true;
-                document.getElementById('announceContent').disabled = true;
-                document.getElementById('announcePinned').disabled = true;
-                document.querySelector('#announceModal .btn-success').style.display = 'none';
-            } catch (e) {}
+            } catch {}
         }
 
-        function closeAnnounceModal() {
-            document.getElementById('announceModal').classList.remove('show');
-            document.getElementById('announceTitle').disabled = false;
-            document.getElementById('announceContent').disabled = false;
-            document.getElementById('announcePinned').disabled = false;
-            document.querySelector('#announceModal .btn-success').style.display = '';
-        }
+        function closeAnnounceModal() { document.getElementById('announceModal').classList.remove('show'); }
 
         async function saveAnnouncement() {
             const id = document.getElementById('editAnnounceId').value;
@@ -935,13 +728,8 @@
             const isPinned = document.getElementById('announcePinned').checked;
             if (!title) { showToast('请输入公告标题', 'error'); return; }
             try {
-                if (id) {
-                    await Api.announce.update({ id, title, content, is_pinned: isPinned });
-                    showToast('公告已更新', 'success');
-                } else {
-                    await Api.announce.create({ title, content, is_pinned: isPinned });
-                    showToast('公告已发布', 'success');
-                }
+                if (id) { await Api.announce.update({ id, title, content, is_pinned: isPinned }); showToast('公告已更新', 'success'); }
+                else { await Api.announce.create({ title, content, is_pinned: isPinned }); showToast('公告已发布', 'success'); }
                 closeAnnounceModal();
                 loadHomePage();
             } catch (e) { showToast(e.message, 'error'); }
@@ -950,42 +738,33 @@
         // ========== 任务页 ==========
         async function loadTasksPage() {
             let html = '';
+            const canOperate = Api.canOperate();
             try {
                 const data = await Api.tasks.list();
                 const tasks = data.tasks || [];
-
                 if (tasks.length === 0) {
                     html = '<div class="empty"><div class="icon">📋</div><p>暂无任务</p>';
-                    if (isParent) html += '<button class="btn btn-sm" onclick="showAddTask()">添加任务</button>';
+                    if (canOperate) html += '<button class="btn btn-sm" onclick="showAddTask()">添加任务</button>';
                     html += '</div>';
                 } else {
                     tasks.forEach(task => {
-                        const canComplete = task.can_complete;
                         html += '<div class="card">';
                         html += '<div style="display:flex;justify-content:space-between;align-items:start">';
                         html += '<div style="flex:1"><div class="card-title">' + escapeHtml(task.title) + '</div>';
                         if (task.description) html += '<div class="card-meta">' + escapeHtml(task.description) + '</div>';
                         html += '<div class="card-meta">' + getRepeatText(task.repeat_type) + '</div></div>';
                         html += '<span class="tag">+' + task.points + '</span></div>';
-                        html += '<div class="task-actions">';
-
-                        if (isParent) {
+                        html += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">';
+                        if (canOperate) {
                             html += '<button class="btn btn-sm btn-outline" onclick="doEditTask(' + task.id + ')">编辑</button>';
                             html += '<button class="btn btn-sm btn-danger" onclick="doDeleteTask(' + task.id + ')">删除</button>';
                         } else {
-                            if (canComplete) {
-                                html += '<button class="btn btn-sm btn-success" onclick="doCompleteTask(' + task.id + ')">完成任务</button>';
-                            } else {
-                                html += '<button class="btn btn-sm btn-outline" disabled>已完成</button>';
-                            }
+                            html += '<button class="btn btn-sm ' + (task.can_complete ? 'btn-success' : 'btn-outline') + '" onclick="doCompleteTask(' + task.id + ')"' + (task.can_complete ? '' : ' disabled') + '>' + (task.can_complete ? '完成任务' : '已完成') + '</button>';
                         }
                         html += '</div></div>';
                     });
                 }
-            } catch (e) {
-                html = '<div class="card"><p style="color:var(--danger)">加载失败：' + e.message + '</p></div>';
-            }
-
+            } catch (e) { html = '<div class="card"><p style="color:var(--danger)">加载失败：' + e.message + '</p></div>'; }
             document.getElementById('tasksContent').innerHTML = html;
         }
 
@@ -997,7 +776,6 @@
             document.getElementById('taskPoints').value = '10';
             document.getElementById('taskRepeat').value = 'once';
             document.getElementById('taskModal').classList.add('show');
-            document.getElementById('taskName').focus();
         }
 
         async function doEditTask(id) {
@@ -1015,9 +793,7 @@
             } catch (e) { showToast('加载失败', 'error'); }
         }
 
-        function closeTaskModal() {
-            document.getElementById('taskModal').classList.remove('show');
-        }
+        function closeTaskModal() { document.getElementById('taskModal').classList.remove('show'); }
 
         async function saveTask() {
             const id = document.getElementById('editTaskId').value;
@@ -1025,54 +801,39 @@
             const description = document.getElementById('taskDesc').value.trim();
             const points = parseInt(document.getElementById('taskPoints').value) || 10;
             const repeatType = document.getElementById('taskRepeat').value;
-
             if (!title) { showToast('请输入任务名称', 'error'); return; }
-            if (points < 1 || points > 500) { showToast('积分需在1-500之间', 'error'); return; }
-
             try {
-                const payload = { title, description, points, repeat_type: repeatType };
-                if (id) {
-                    payload.id = parseInt(id);
-                    await Api.tasks.update(payload);
-                    showToast('任务已更新', 'success');
-                } else {
-                    await Api.tasks.create(payload);
-                    showToast('任务已创建', 'success');
-                }
+                if (id) { await Api.tasks.update({ id: parseInt(id), title, description, points, repeat_type: repeatType }); showToast('任务已更新', 'success'); }
+                else { await Api.tasks.create({ title, description, points, repeat_type: repeatType }); showToast('任务已创建', 'success'); }
                 closeTaskModal();
-                await loadTasksPage();
+                loadTasksPage();
             } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function doCompleteTask(id) {
             try {
-                const result = await Api.tasks.complete(id);
-                showToast('获得 ' + result.points_earned + ' 积分！', 'success');
-                await loadTasksPage();
-                await loadHomePage();
+                const r = await Api.tasks.complete(id);
+                showToast('获得 ' + r.points_earned + ' 积分！', 'success');
+                loadTasksPage();
             } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function doDeleteTask(id) {
             if (!confirm('确定删除该任务？')) return;
-            try {
-                await Api.tasks.delete(id);
-                showToast('已删除', 'success');
-                await loadTasksPage();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.tasks.delete(id); showToast('已删除', 'success'); loadTasksPage(); } catch (e) { showToast(e.message, 'error'); }
         }
 
         // ========== 商城页 ==========
         async function loadShopPage() {
             let html = '';
+            const canOperate = Api.canOperate();
             try {
                 const data = await Api.rewards.list();
                 const rewards = data.rewards || [];
                 const myRedemptions = data.my_redemptions || [];
-
                 if (rewards.length === 0 && myRedemptions.length === 0) {
                     html = '<div class="empty"><div class="icon">🎁</div><p>暂无奖励</p>';
-                    if (isParent) html += '<button class="btn btn-sm" onclick="showAddReward()">添加奖励</button>';
+                    if (canOperate) html += '<button class="btn btn-sm" onclick="showAddReward()">添加奖励</button>';
                     html += '</div>';
                 } else {
                     if (rewards.length > 0) {
@@ -1081,30 +842,24 @@
                             html += '<div class="card">';
                             html += '<div style="display:flex;justify-content:space-between;align-items:center">';
                             html += '<div style="flex:1"><div class="card-title">' + escapeHtml(r.title) + '</div>';
-                            if (r.description) html += '<div class="card-meta">' + escapeHtml(r.description) + '</div>';
-                            html += '</div>';
+                            if (r.description) html += '<div class="card-meta">' + escapeHtml(r.description) + '</div></div>';
                             html += '<span class="tag">' + r.points_cost + '分</span></div>';
-                            if (!isParent) {
-                                html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="doRedeem(' + r.id + ')">申请兑换</button>';
-                            }
+                            if (!canOperate && Api.isChild()) html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="doRedeem(' + r.id + ')">申请兑换</button>';
                             html += '</div>';
                         });
                     }
-
                     if (myRedemptions.length > 0) {
                         html += '<div class="section-title">我的兑换记录</div>';
                         myRedemptions.forEach(r => {
-                            const statusMap = { pending: '待审批', approved: '已通过', rejected: '已拒绝' };
-                            const clsMap = { pending: 'tag-pending', approved: 'tag-success', rejected: 'tag-danger' };
+                            const sm = { pending: '待审批', approved: '已通过', rejected: '已拒绝' };
+                            const cm = { pending: 'tag-pending', approved: 'tag-success', rejected: 'tag-danger' };
                             html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
                             html += '<div><div>' + escapeHtml(r.reward_title) + '</div><div class="card-meta">' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
-                            html += '<span class="tag ' + (clsMap[r.status] || '') + '">' + (statusMap[r.status] || r.status) + '</span>';
-                            html += '</div></div>';
+                            html += '<span class="tag ' + (cm[r.status] || '') + '">' + (sm[r.status] || r.status) + '</span></div></div>';
                         });
                     }
                 }
             } catch (e) { html = '<div class="card"><p style="color:var(--danger)">加载失败：' + e.message + '</p></div>'; }
-
             document.getElementById('shopContent').innerHTML = html;
         }
 
@@ -1113,104 +868,305 @@
             document.getElementById('rewardDesc').value = '';
             document.getElementById('rewardCost').value = '50';
             document.getElementById('rewardModal').classList.add('show');
-            document.getElementById('rewardName').focus();
         }
-
-        function closeRewardModal() {
-            document.getElementById('rewardModal').classList.remove('show');
-        }
+        function closeRewardModal() { document.getElementById('rewardModal').classList.remove('show'); }
 
         async function saveReward() {
             const title = document.getElementById('rewardName').value.trim();
             const description = document.getElementById('rewardDesc').value.trim();
             const pointsCost = parseInt(document.getElementById('rewardCost').value) || 50;
-
             if (!title) { showToast('请输入奖励名称', 'error'); return; }
-            if (pointsCost < 1) { showToast('所需积分必须大于0', 'error'); return; }
-
-            try {
-                await Api.rewards.create({ title, description, points_cost: pointsCost });
-                showToast('奖励已创建', 'success');
-                closeRewardModal();
-                await loadShopPage();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.rewards.create({ title, description, points_cost: pointsCost }); showToast('奖励已创建', 'success'); closeRewardModal(); loadShopPage(); } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function doRedeem(id) {
-            try {
-                await Api.rewards.redeem(id);
-                showToast('兑换申请已提交，等待审批', 'success');
-                await loadShopPage();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.rewards.redeem(id); showToast('兑换申请已提交', 'success'); loadShopPage(); } catch (e) { showToast(e.message, 'error'); }
         }
 
-        // ========== 审批页 ==========
+        // ========== 审批页（爸妈） ==========
         async function loadApprovePage() {
-            if (!isParent) return;
+            if (!Api.canOperate()) return;
             let html = '';
             try {
                 const data = await Api.rewards.pendingApprovals();
                 const pending = data.pending || [];
-
                 if (pending.length === 0) {
                     html = '<div class="empty"><div class="icon">📮</div><p>暂无待审批的兑换</p></div>';
                 } else {
                     pending.forEach(p => {
                         html += '<div class="card">';
                         html += '<div style="display:flex;justify-content:space-between;align-items:center">';
-                        html += '<div><div class="card-title">' + p.username + '</div>';
+                        html += '<div><div class="card-title">' + escapeHtml(p.username) + '</div>';
                         html += '<div class="card-meta">申请兑换: ' + escapeHtml(p.reward_title) + '</div>';
                         html += '<div class="card-meta">' + p.points_spent + '积分 · ' + formatDate(p.created_at) + '</div></div>';
                         html += '<span class="tag tag-pending">待审批</span></div>';
                         html += '<div style="display:flex;gap:8px;margin-top:12px">';
-                        html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="doApprove(' + p.id + ', true)">通过</button>';
-                        html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="doApprove(' + p.id + ', false)">拒绝</button>';
+                        html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="doApprove(' + p.id + ',true)">通过</button>';
+                        html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="doApprove(' + p.id + ',false)">拒绝</button>';
                         html += '</div></div>';
                     });
                 }
-            } catch (e) { html = '<div class="card"><p style="color:var(--danger)">加载失败</p></div>'; }
-
+            } catch (e) { html = '<div class="card"><p>加载失败</p></div>'; }
             document.getElementById('approveContent').innerHTML = html;
-
-            try {
-                const data = await Api.rewards.pendingApprovals();
-                const count = (data.pending || []).length;
-                const badge = document.getElementById('approveBadge');
-                if (badge) {
-                    if (count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
-                    else { badge.style.display = 'none'; }
-                }
-            } catch (e) {}
         }
 
         async function doApprove(id, approve) {
+            try { await Api.rewards.approve(id, approve ? 'approve' : 'reject'); showToast(approve ? '已通过' : '已拒绝', 'success'); loadApprovePage(); } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ========== 日历页 ==========
+        let calYear = new Date().getFullYear();
+        let calMonth = new Date().getMonth() + 1;
+        let calSelectedDate = null;
+
+        async function loadCalendarPage() {
+            const canOperate = Api.canOperate();
+            let html = '<div class="calendar-wrap">';
+
+            // 月份导航
+            const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+            html += '<div class="cal-header">';
+            html += '<span class="cal-title">' + calYear + '年 ' + monthNames[calMonth - 1] + '</span>';
+            html += '<div class="cal-nav">';
+            html += '<button onclick="calNav(-1)">◀</button>';
+            html += '<button onclick="calNav(0)">今天</button>';
+            html += '<button onclick="calNav(1)">▶</button>';
+            html += '</div></div>';
+
+            // 星期标题
+            const weekdays = ['日','一','二','三','四','五','六'];
+            html += '<div class="cal-grid">';
+            weekdays.forEach(d => html += '<div class="cal-weekday">' + d + '</div>');
+
+            // 获取当月事件
+            let eventsMap = {};
+            let birthdayMap = {};
             try {
-                await Api.rewards.approve(id, approve ? 'approve' : 'reject');
-                showToast(approve ? '已通过' : '已拒绝', 'success');
-                await loadApprovePage();
-                await loadHomePage();
+                const data = await Api.events.list(calYear, calMonth);
+                (data.events || []).forEach(e => {
+                    const day = parseInt(e.event_date.split('-')[2]);
+                    if (!eventsMap[day]) eventsMap[day] = [];
+                    eventsMap[day].push(e);
+                });
+                (data.birthdays || []).forEach(b => {
+                    const day = parseInt(b.event_date.split('-')[2]);
+                    if (!birthdayMap[day]) birthdayMap[day] = [];
+                    birthdayMap[day].push(b);
+                });
+            } catch {}
+
+            // 构建日历格子
+            const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
+            const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+            for (let i = 0; i < firstDay; i++) {
+                const prevDays = new Date(calYear, calMonth - 1, 0).getDate();
+                html += '<div class="cal-day other-month">' + (prevDays - firstDay + 1 + i) + '</div>';
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = calYear + '-' + String(calMonth).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+                const isToday = dateStr === todayStr;
+                const hasEvent = eventsMap[d] && eventsMap[d].length > 0;
+                const hasBirthday = birthdayMap[d] && birthdayMap[d].length > 0;
+                const isSelected = calSelectedDate === dateStr;
+                let cls = 'cal-day';
+                if (isToday) cls += ' today';
+                if (hasEvent || hasBirthday) cls += ' has-event';
+                if (isSelected) cls += ' selected';
+                html += '<div class="' + cls + '" onclick="calSelect(' + d + ',\'' + dateStr + '\')">' + d + '</div>';
+            }
+            html += '</div></div>';
+
+            // 图例
+            html += '<div class="event-legend">';
+            html += '<div class="event-legend-item"><div class="event-legend-dot" style="background:var(--primary)"></div>普通</div>';
+            html += '<div class="event-legend-item"><div class="event-legend-dot" style="background:#2196F3"></div>旅游</div>';
+            html += '<div class="event-legend-item"><div class="event-legend-dot" style="background:#e91e63"></div>生日</div>';
+            html += '<div class="event-legend-item"><div class="event-legend-dot" style="background:#9C27B0"></div>奖励</div>';
+            html += '</div>';
+
+            // 选中日期的事件
+            if (calSelectedDate) {
+                html += '<div id="calDayEvents"></div>';
+            }
+
+            // 添加按钮（爸妈）
+            if (canOperate) {
+                html += '<button class="btn btn-sm" style="margin-top:12px" onclick="openAddEvent()">+ 添加日程</button>';
+            }
+
+            document.getElementById('calendarContent').innerHTML = html;
+
+            // 加载选中日期事件
+            if (calSelectedDate) await loadCalDayEvents();
+        }
+
+        function calNav(dir) {
+            if (dir === 0) { calYear = new Date().getFullYear(); calMonth = new Date().getMonth() + 1; calSelectedDate = null; }
+            else { calMonth += dir; if (calMonth > 12) { calMonth = 1; calYear++; } if (calMonth < 1) { calMonth = 12; calYear--; } }
+            loadCalendarPage();
+        }
+
+        async function calSelect(day, dateStr) {
+            calSelectedDate = dateStr;
+            document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            await loadCalDayEvents();
+        }
+
+        async function loadCalDayEvents() {
+            if (!calSelectedDate) return;
+            const el = document.getElementById('calDayEvents');
+            if (!el) return;
+
+            let html = '<div class="section-title">' + calSelectedDate + ' 日程</div><div class="card cal-events">';
+            try {
+                const data = await Api.events.list(calYear, calMonth);
+                const dayEvents = (data.events || []).filter(e => e.event_date === calSelectedDate);
+
+                if (dayEvents.length === 0) {
+                    html += '<div class="cal-no-events">暂无日程</div>';
+                } else {
+                    dayEvents.forEach(ev => {
+                        const dotCls = { travel: 'travel', birthday: 'birthday', reward: 'reward' }[ev.category] || 'event';
+                        html += '<div class="cal-event-item">';
+                        html += '<div class="cal-event-dot ' + dotCls + '"></div>';
+                        html += '<div class="cal-event-title">' + escapeHtml(ev.title) + '</div>';
+                        if (Api.canOperate()) html += '<button class="btn btn-sm btn-ghost" onclick="openEditEvent(' + ev.id + ')">编辑</button>';
+                        html += '</div>';
+                        if (ev.description) html += '<div style="font-size:13px;color:var(--text-light);padding:0 0 8px 18px">' + escapeHtml(ev.description) + '</div>';
+                    });
+                }
+                // 生日
+                const bdays = (data.birthdays || []).filter(b => {
+                    const bdayDay = parseInt(b.event_date.split('-')[2]);
+                    return bdayDay === parseInt(calSelectedDate.split('-')[2]);
+                });
+                bdays.forEach(b => {
+                    html += '<div class="cal-event-item">';
+                    html += '<div class="cal-event-dot birthday"></div>';
+                    html += '<div class="cal-event-title">' + escapeHtml(b.title) + ' (' + b.days_until + '天后)</div>';
+                    html += '</div>';
+                });
+            } catch (e) { html += '<div class="cal-no-events">加载失败</div>'; }
+            html += '</div>';
+            el.innerHTML = html;
+        }
+
+        function openAddEvent() {
+            document.getElementById('eventModalTitle').textContent = '添加日程';
+            document.getElementById('editEventId').value = '';
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDate').value = calSelectedDate || '';
+            document.getElementById('eventCategory').value = 'event';
+            document.getElementById('eventDesc').value = '';
+            document.getElementById('eventDeleteBtn').style.display = 'none';
+            document.querySelectorAll('#eventCatPicker .cat-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelector('#eventCatPicker .cat-btn').classList.add('selected');
+            document.getElementById('eventModal').classList.add('show');
+        }
+
+        async function openEditEvent(id) {
+            try {
+                const data = await Api.events.list(calYear, calMonth);
+                const ev = (data.events || []).find(e => e.id === id);
+                if (!ev) return;
+                document.getElementById('eventModalTitle').textContent = '编辑日程';
+                document.getElementById('editEventId').value = id;
+                document.getElementById('eventTitle').value = ev.title;
+                document.getElementById('eventDate').value = ev.event_date;
+                document.getElementById('eventCategory').value = ev.category;
+                document.getElementById('eventDesc').value = ev.description || '';
+                document.getElementById('eventDeleteBtn').style.display = '';
+                document.querySelectorAll('#eventCatPicker .cat-btn').forEach(b => { b.classList.toggle('selected', b.dataset.val === ev.category); });
+                document.getElementById('eventModal').classList.add('show');
+            } catch {}
+        }
+
+        function pickEventCat(btn) {
+            document.querySelectorAll('#eventCatPicker .cat-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('eventCategory').value = btn.dataset.val;
+        }
+
+        function closeEventModal() { document.getElementById('eventModal').classList.remove('show'); }
+
+        async function saveEvent() {
+            const id = document.getElementById('editEventId').value;
+            const title = document.getElementById('eventTitle').value.trim();
+            const date = document.getElementById('eventDate').value;
+            const category = document.getElementById('eventCategory').value;
+            const description = document.getElementById('eventDesc').value.trim();
+            if (!title || !date) { showToast('请填写标题和日期', 'error'); return; }
+            try {
+                if (id) { await Api.events.update({ id, title, event_date: date, category, description }); showToast('日程已更新', 'success'); }
+                else { await Api.events.create({ title, event_date: date, category, description }); showToast('日程已添加', 'success'); }
+                closeEventModal();
+                await loadCalendarPage();
             } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function deleteEvent() {
+            const id = document.getElementById('editEventId').value;
+            if (!confirm('确定删除该日程？')) return;
+            try { await Api.events.delete(id); showToast('已删除', 'success'); closeEventModal(); await loadCalendarPage(); } catch (e) { showToast(e.message, 'error'); }
         }
 
         // ========== 我的页面 ==========
         async function loadSettingsPage() {
+            const canOperate = Api.canOperate();
+            const canManageMembers = Api.canManageMembers();
+            const isChild = Api.isChild();
             let html = '';
 
-            if (isParent) {
+            if (canManageMembers) {
+                // 爸爸：成员账号管理
+                html += '<div class="section-title">👨‍👩‍👧 成员账号管理</div>';
+                html += '<div class="card">';
+                html += '<div class="form-group"><label>添加成员</label>';
+                html += '<input type="text" id="memberName" placeholder="成员名称">';
+                html += '<select id="memberRole" style="margin-top:8px"><option value="child">孩子</option><option value="parent">家长</option></select>';
+                html += '<input type="password" id="memberPass" placeholder="设置密码（至少6位）" style="margin-top:8px">';
+                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="doCreateMember()">添加</button></div></div>';
+
+                try {
+                    const fd = await Api.family.list();
+                    const parents = (fd.members || []).filter(m => m.role === 'parent');
+                    const children = (fd.members || []).filter(m => m.role === 'child');
+                    if (parents.length > 0) {
+                        html += '<div style="margin-top:8px"><strong style="font-size:13px;color:var(--text-light)">家长</strong></div>';
+                        parents.forEach(m => {
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                            html += '<div style="font-weight:600">' + m.username + '</div>';
+                            html += '</div></div>';
+                        });
+                    }
+                    if (children.length > 0) {
+                        html += '<div style="margin-top:8px"><strong style="font-size:13px;color:var(--text-light)">孩子</strong></div>';
+                        children.forEach(c => {
+                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
+                            html += '<div><div style="font-weight:600">' + c.username + '</div><div style="font-size:13px;color:var(--text-light)">积分: ' + c.points + '</div></div>';
+                            html += '</div></div>';
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            if (canOperate) {
                 // 积分调整说明
                 html += '<div class="section-title">💰 积分调整说明</div>';
-                html += '<div class="card"><div class="adjust-tip">';
-                html += '• 点击首页孩子积分卡片上的按钮可快速调整积分<br>';
-                html += '• 详细调整：请在首页点击对应按钮，填写原因后确认<br>';
-                html += '• <b style="color:var(--success)">奖励</b>：孩子表现好时加分，记得填写原因<br>';
-                html += '• <b style="color:var(--danger)">扣分</b>：需要填写具体原因，让扣分明明白白<br>';
-                html += '• 积分调整会记录在孩子的积分明细中，孩子可在「我的」页面查看';
+                html += '<div class="card"><div style="font-size:13px;color:var(--text-light);line-height:1.8">';
+                html += '• 首页点击孩子积分卡片的按钮可快速调整积分<br>';
+                html += '• <b style="color:var(--success)">奖励</b>：孩子表现好时加分，请填写原因<br>';
+                html += '• <b style="color:var(--danger)">扣分</b>：需填写具体原因，孩子可在积分明细中查看<br>';
+                html += '• 积分调整会记录在孩子的积分明细历史中';
                 html += '</div></div>';
 
                 // 生日管理
                 html += '<div class="section-title">🎂 生日管理</div>';
-                html += '<div class="card">';
-                html += '<div class="form-group"><label>添加生日</label>';
+                html += '<div class="card"><div class="form-group"><label>添加生日</label>';
                 html += '<input type="text" id="birthdayName" placeholder="成员名称">';
                 html += '<input type="date" id="birthdayDate" style="margin-top:8px">';
                 html += '<button class="btn btn-sm" style="margin-top:8px" onclick="doAddBirthday()">添加</button></div></div>';
@@ -1218,199 +1174,144 @@
 
                 // 证件管理
                 html += '<div class="section-title">📁 证件管理</div>';
-                html += '<div class="card">';
-                html += '<div class="form-group"><label>添加证件</label>';
-                html += '<input type="text" id="docName" placeholder="证件名称（如：身份证、护照）">';
+                html += '<div class="card"><div class="form-group"><label>添加证件</label>';
+                html += '<input type="text" id="docName" placeholder="证件名称">';
                 html += '<input type="text" id="docInfo" placeholder="证件号码" style="margin-top:8px">';
                 html += '<button class="btn btn-sm" style="margin-top:8px" onclick="doAddDocument()">添加</button></div></div>';
                 html += '<div id="documentList"></div>';
 
                 loadFamilyInfo();
-            } else {
+            }
+
+            if (isChild) {
                 // 孩子：积分历史
-                html += '<div class="section-title">💰 积分明细</div>';
-                html += '<div class="card">';
+                html += '<div class="section-title">💰 积分明细</div><div class="card">';
                 try {
                     const data = await Api.points.history();
                     const history = data.history || [];
-                    if (history.length === 0) {
-                        html += '<p style="text-align:center;color:var(--text-light)">暂无积分记录</p>';
-                    } else {
-                        history.forEach(h => {
-                            const sign = h.amount > 0 ? '+' : '';
-                            const color = h.amount > 0 ? 'var(--success)' : 'var(--danger)';
-                            html += '<div class="list-item" style="padding:10px 0">';
-                            html += '<div><div>' + escapeHtml(h.note || getTypeText(h.type)) + '</div>';
-                            html += '<div style="font-size:12px;color:var(--text-light)">' + formatDate(h.created_at) + '</div></div>';
-                            html += '<div style="color:' + color + ';font-weight:600">' + sign + h.amount + '</div>';
-                            html += '</div>';
-                        });
-                    }
+                    if (history.length === 0) html += '<p style="text-align:center;color:var(--text-light)">暂无积分记录</p>';
+                    else history.forEach(h => {
+                        const sign = h.amount > 0 ? '+' : '';
+                        const color = h.amount > 0 ? 'var(--success)' : 'var(--danger)';
+                        html += '<div class="list-item" style="padding:10px 0">';
+                        html += '<div><div>' + escapeHtml(h.note || getTypeText(h.type)) + '</div>';
+                        html += '<div style="font-size:12px;color:var(--text-light)">' + formatDate(h.created_at) + '</div></div>';
+                        html += '<div style="color:' + color + ';font-weight:600">' + sign + h.amount + '</div></div>';
+                    });
                 } catch (e) { html += '<p>加载失败</p>'; }
                 html += '</div>';
-
-                // 家庭公告
-                html += '<div class="section-title">📢 家庭公告</div>';
-                try {
-                    const adata = await Api.announce.list();
-                    const anns = adata.announcements || [];
-                    if (anns.length === 0) {
-                        html += '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无公告</p></div>';
-                    } else {
-                        anns.forEach(a => {
-                            html += '<div class="card">';
-                            html += '<div style="font-weight:600;margin-bottom:6px">' + (a.is_pinned ? '📌 ' : '') + escapeHtml(a.title) + '</div>';
-                            if (a.content) html += '<div style="font-size:14px;color:var(--text-light);margin-bottom:6px">' + escapeHtml(a.content) + '</div>';
-                            html += '<div style="font-size:12px;color:var(--text-light)">' + a.author_name + ' · ' + formatDate(a.created_at) + '</div>';
-                            html += '</div>';
-                        });
-                    }
-                } catch (e) {}
             }
 
             document.getElementById('settingsContent').innerHTML = html;
         }
 
-        // ========== 家庭资料 ==========
         async function loadFamilyInfo() {
             try {
                 const data = await Api.family.list();
                 const info = data.info || [];
 
                 const birthdays = info.filter(i => i.category === 'birthday');
-                let bHtml = '';
-                if (birthdays.length === 0) bHtml = '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无生日记录</p></div>';
+                let bHtml = birthdays.length === 0 ? '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无生日记录</p></div>' : '';
                 birthdays.forEach(b => {
-                    const days = b.days_until !== undefined ? b.days_until : '?';
                     bHtml += '<div class="card"><div class="list-item" style="padding:0;border:none">';
                     bHtml += '<div><div style="font-weight:600">🎂 ' + escapeHtml(b.title) + '</div>';
-                    bHtml += '<div style="font-size:13px;color:var(--text-light)">' + b.content + '（' + days + '天后）</div></div>';
-                    bHtml += '<button class="btn btn-sm btn-danger" onclick="doDeleteFamilyInfo(' + b.id + ')">删除</button>';
-                    bHtml += '</div></div>';
+                    bHtml += '<div style="font-size:13px;color:var(--text-light)">' + b.content + '（' + b.days_until + '天后）</div></div>';
+                    bHtml += '<button class="btn btn-sm btn-danger" onclick="doDeleteFamilyInfo(' + b.id + ')">删除</button></div></div>';
                 });
-                const bList = document.getElementById('birthdayList');
-                if (bList) bList.innerHTML = bHtml;
+                const el = document.getElementById('birthdayList');
+                if (el) el.innerHTML = bHtml;
 
                 const docs = info.filter(i => i.category === 'document');
-                let dHtml = '';
-                if (docs.length === 0) dHtml = '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无证件记录</p></div>';
+                let dHtml = docs.length === 0 ? '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无证件记录</p></div>' : '';
                 docs.forEach(d => {
                     dHtml += '<div class="card"><div class="list-item" style="padding:0;border:none">';
                     dHtml += '<div><div style="font-weight:600">📄 ' + escapeHtml(d.title) + '</div>';
                     dHtml += '<div style="font-size:13px;color:var(--text-light)">' + escapeHtml(d.content) + '</div></div>';
-                    dHtml += '<button class="btn btn-sm btn-danger" onclick="doDeleteFamilyInfo(' + d.id + ')">删除</button>';
-                    dHtml += '</div></div>';
+                    dHtml += '<button class="btn btn-sm btn-danger" onclick="doDeleteFamilyInfo(' + d.id + ')">删除</button></div></div>';
                 });
-                const dList = document.getElementById('documentList');
-                if (dList) dList.innerHTML = dHtml;
+                const el2 = document.getElementById('documentList');
+                if (el2) el2.innerHTML = dHtml;
             } catch (e) { console.error(e); }
         }
 
-        // ========== 积分调整 ==========
+        async function doCreateMember() {
+            const name = document.getElementById('memberName').value.trim();
+            const role = document.getElementById('memberRole').value;
+            const pass = document.getElementById('memberPass').value;
+            if (!name || !pass) { showToast('请填写名称和密码', 'error'); return; }
+            if (pass.length < 6) { showToast('密码至少6位', 'error'); return; }
+            try {
+                if (role === 'child') await Api.auth.createChild(name, pass);
+                else await Api.auth.createParent(name, pass);
+                showToast('成员已添加', 'success');
+                document.getElementById('memberName').value = '';
+                document.getElementById('memberPass').value = '';
+                loadSettingsPage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
         function openAdjustModal(userId, userName, presetVal) {
             document.getElementById('adjustUserId').value = userId;
             document.getElementById('adjustChildName').textContent = userName;
             document.getElementById('adjustAmount').value = Math.abs(presetVal);
             document.getElementById('adjustNote').value = '';
-            if (presetVal < 0) {
-                document.getElementById('adjustAmount').value = Math.abs(presetVal);
-            }
             document.getElementById('adjustModal').classList.add('show');
         }
 
-        function setAdjustVal(val) {
-            document.getElementById('adjustAmount').value = val < 0 ? -Math.abs(val) : Math.abs(val);
-            document.getElementById('adjustAmount').value = Math.abs(val);
-            if (val < 0) {
-                document.getElementById('adjustAmount').value = -Math.abs(val);
-            }
-        }
-
-        function closeAdjustModal() {
-            document.getElementById('adjustModal').classList.remove('show');
-        }
+        function setAdjustVal(v) { document.getElementById('adjustAmount').value = Math.abs(v); }
+        function closeAdjustModal() { document.getElementById('adjustModal').classList.remove('show'); }
 
         async function confirmAdjust() {
             const userId = parseInt(document.getElementById('adjustUserId').value);
             const amount = parseInt(document.getElementById('adjustAmount').value);
             const note = document.getElementById('adjustNote').value.trim();
-
-            if (!userId || !amount) { showToast('参数错误', 'error'); return; }
             if (!note) { showToast('请填写调整原因', 'error'); return; }
-
             const type = amount > 0 ? 'bonus' : 'deduct';
-            try {
-                await Api.points.adjust(userId, Math.abs(amount), type, note);
-                showToast((amount > 0 ? '+' : '') + amount + '积分（' + note + '）', 'success');
-                closeAdjustModal();
-                await loadHomePage();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.points.adjust(userId, Math.abs(amount), type, note); showToast((amount > 0 ? '+' : '') + amount + '分（' + note + '）', 'success'); closeAdjustModal(); loadHomePage(); } catch (e) { showToast(e.message, 'error'); }
         }
 
-        // ========== 家庭资料操作 ==========
         async function doAddBirthday() {
             const name = document.getElementById('birthdayName').value.trim();
             const date = document.getElementById('birthdayDate').value;
             if (!name || !date) { showToast('请填写名称和日期', 'error'); return; }
-            try {
-                await Api.family.create({ category: 'birthday', title: name, content: date });
-                showToast('生日已添加', 'success');
-                document.getElementById('birthdayName').value = '';
-                document.getElementById('birthdayDate').value = '';
-                await loadFamilyInfo();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.family.create({ category: 'birthday', title: name, content: date }); showToast('生日已添加', 'success'); document.getElementById('birthdayName').value = ''; document.getElementById('birthdayDate').value = ''; loadFamilyInfo(); } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function doAddDocument() {
             const name = document.getElementById('docName').value.trim();
             const info = document.getElementById('docInfo').value.trim();
             if (!name || !info) { showToast('请填写证件名称和信息', 'error'); return; }
-            try {
-                await Api.family.create({ category: 'document', title: name, content: info });
-                showToast('证件已添加', 'success');
-                document.getElementById('docName').value = '';
-                document.getElementById('docInfo').value = '';
-                await loadFamilyInfo();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.family.create({ category: 'document', title: name, content: info }); showToast('证件已添加', 'success'); document.getElementById('docName').value = ''; document.getElementById('docInfo').value = ''; loadFamilyInfo(); } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function doDeleteFamilyInfo(id) {
             if (!confirm('确定删除？')) return;
-            try {
-                await Api.family.delete(id);
-                showToast('已删除', 'success');
-                await loadFamilyInfo();
-            } catch (e) { showToast(e.message, 'error'); }
+            try { await Api.family.delete(id); showToast('已删除', 'success'); loadFamilyInfo(); } catch (e) { showToast(e.message, 'error'); }
         }
 
         // ========== 工具函数 ==========
         function showToast(msg, type = '') {
-            const toast = document.getElementById('toast');
-            toast.className = 'toast' + (type ? ' ' + type : '');
-            toast.textContent = msg;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 3000);
+            const t = document.getElementById('toast');
+            t.className = 'toast' + (type ? ' ' + type : '');
+            t.textContent = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
         function escapeHtml(str) {
             if (!str) return '';
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
         }
 
-        function getRepeatText(type) {
-            return { once: '一次性', daily: '每日', weekly: '每周' }[type] || type;
-        }
-
-        function getTypeText(type) {
-            return { earn: '完成任务', redeem: '兑换奖励', bonus: '奖励加分', deduct: '扣分' }[type] || type;
-        }
+        function getRepeatText(type) { return { once: '一次性', daily: '每日', weekly: '每周' }[type] || type; }
+        function getTypeText(type) { return { earn: '完成任务', redeem: '兑换奖励', bonus: '奖励加分', deduct: '扣分' }[type] || type; }
 
         function formatDate(str) {
             if (!str) return '';
             const d = new Date(str);
-            return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+            return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
         }
     </script>
 </body>
