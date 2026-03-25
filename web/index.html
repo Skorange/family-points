@@ -235,11 +235,25 @@
         .event-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-light); }
         .event-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-        /* Birthday banner */
-        .birthday-banner { background: linear-gradient(135deg, #e91e63, #f48fb1); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; color: white; }
-        .birthday-banner-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
-        .birthday-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; }
-        .tag-soon { background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+        /* Upcoming events banner */
+        .upcoming-banner { background: linear-gradient(135deg, #FF6B35, #FF8E53); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; color: white; }
+        .upcoming-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+        .upcoming-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 14px; }
+        .upcoming-icon { font-size: 16px; flex-shrink: 0; }
+        .upcoming-name { flex: 1; }
+        .upcoming-tag { background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 10px; font-size: 12px; white-space: nowrap; }
+        .upcoming-tag.today { background: white; color: #e91e63; font-weight: 600; }
+
+        /* Landscape / tablet optimization */
+        @media (orientation: landscape) {
+            body { max-width: 100%; padding-bottom: 10px; }
+            .page { padding: 12px 24px; }
+            .card { padding: 14px; }
+        }
+        @media (min-width: 600px) {
+            body { max-width: 580px; }
+            .page { padding: 16px 24px; }
+        }
     </style>
 </head>
 <body>
@@ -290,6 +304,9 @@
             <div class="nav-item" onclick="switchPage('shop')">
                 <span class="icon">🎁</span><span>商城</span>
             </div>
+            <div class="nav-item" onclick="switchPage('approve')" id="approveNav" style="display:none">
+                <span class="icon">✅</span><span>审批</span>
+            </div>
             <div class="nav-item" onclick="switchPage('calendar')">
                 <span class="icon">📅</span><span>日历</span>
             </div>
@@ -305,14 +322,17 @@
 
         <!-- 任务页 -->
         <div id="tasksPage" class="page">
-            <button class="fab" id="addTaskFab" onclick="showAddTask()">+</button>
             <div id="tasksContent"></div>
         </div>
 
         <!-- 商城页 -->
         <div id="shopPage" class="page">
-            <button class="fab" id="addRewardFab" onclick="showAddReward()">+</button>
             <div id="shopContent"></div>
+        </div>
+
+        <!-- 审批页 -->
+        <div id="approvePage" class="page">
+            <div id="approveContent"></div>
         </div>
 
         <!-- 日历页 -->
@@ -593,16 +613,15 @@
             const canManageMembers = Api.canManageMembers(); // 爸爸专属
             const isChild = Api.isChild();
 
-            // FAB按钮（爸妈可见）
-            const fab1 = document.getElementById('addTaskFab');
-            const fab2 = document.getElementById('addRewardFab');
-            if (fab1) fab1.classList.toggle('show', canOperate);
-            if (fab2) fab2.classList.toggle('show', canOperate);
+            // 审批入口（爸妈可见）
+            const approveNav = document.getElementById('approveNav');
+            if (approveNav) approveNav.style.display = canOperate ? '' : 'none';
 
             switch (currentPage) {
                 case 'home': await loadHomePage(); break;
                 case 'tasks': await loadTasksPage(); break;
                 case 'shop': await loadShopPage(); break;
+                case 'approve': await loadApprovePage(); break;
                 case 'calendar': await loadCalendarPage(); break;
                 case 'settings': await loadSettingsPage(); break;
             }
@@ -646,10 +665,14 @@
                 } else {
                     // 爷爷奶奶 / 孩子：只看积分
                     if (Api.isChild()) {
-                        const pts = await Api.points.history();
+                        let myPoints = Api.user?.points || 0;
+                        try {
+                            const pts = await Api.points.history();
+                            myPoints = pts.current_points;
+                        } catch {}
                         html += '<div class="card points-big">';
                         html += '<div class="label">我的积分</div>';
-                        html += '<div class="value">' + pts.current_points + '<span class="unit">分</span></div>';
+                        html += '<div class="value">' + myPoints + '<span class="unit">分</span></div>';
                         html += '</div>';
                     } else {
                         // 爷爷奶奶：只看孩子积分
@@ -761,6 +784,9 @@
         async function loadTasksPage() {
             let html = '';
             const canOperate = Api.canOperate();
+            if (canOperate) {
+                html += '<button class="btn btn-block" style="margin-bottom:16px;padding:14px;font-size:15px" onclick="showAddTask()">+ 添加新任务</button>';
+            }
             try {
                 const data = await Api.tasks.list();
                 const tasks = data.tasks || [];
@@ -849,6 +875,9 @@
         async function loadShopPage() {
             let html = '';
             const canOperate = Api.canOperate();
+            if (canOperate) {
+                html += '<button class="btn btn-block" style="margin-bottom:16px;padding:14px;font-size:15px" onclick="showAddReward()">+ 添加新奖励</button>';
+            }
             try {
                 const data = await Api.rewards.list();
                 const rewards = data.rewards || [];
@@ -945,22 +974,47 @@
             const canOperate = Api.canOperate();
             let html = '';
 
-            // 生日提醒横幅（显示30天内即将到来的生日）
+            // 近期日程横幅（30天内：生日+所有类型事件）
             try {
-                const fd = await Api.family.list('birthday');
-                const upcoming = (fd.info || []).filter(b => (b.days_until ?? 999) <= 30).sort((a, b) => (a.days_until || 999) - (b.days_until || 999));
+                const [evData, fdData] = await Promise.all([
+                    Api.events.list(calYear, calMonth),
+                    Api.family.list('birthday')
+                ]);
+
+                const today = new Date();
+                const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                const futureStr = new Date(today.getTime() + 30 * 86400000).toISOString().slice(0,10);
+
+                // 收集所有即将到来的事件
+                const upcoming = [];
+                (evData.events || []).forEach(e => {
+                    if (e.event_date >= todayStr && e.event_date <= futureStr) {
+                        const icon = { travel: '✈️', birthday: '🎂', reward: '🎁', event: '📌' }[e.category] || '📌';
+                        upcoming.push({ icon, title: e.title, date: e.event_date, category: e.category, days: Math.round((new Date(e.event_date) - today) / 86400000) });
+                    }
+                });
+                (fdData.info || []).forEach(b => {
+                    if (b.days_until !== undefined && b.days_until >= 0 && b.days_until <= 30) {
+                        upcoming.push({ icon: '🎂', title: b.title, date: b.content, category: 'birthday', days: b.days_until });
+                    }
+                });
+                upcoming.sort((a, b) => a.days - b.days);
+
                 if (upcoming.length > 0) {
-                    html += '<div class="birthday-banner">';
-                    html += '<div class="birthday-banner-title">🎂 近期生日</div>';
-                    upcoming.forEach(b => {
-                        const isToday = b.days_until === 0;
-                        const isSoon = b.days_until <= 7;
-                        const tag = isToday ? '<span class="tag" style="background:var(--danger)">今天！</span>' : '<span class="tag tag-soon">' + b.days_until + '天后</span>';
-                        html += '<div class="birthday-item"><span>🎂 ' + escapeHtml(b.title) + '</span>' + tag + '</div>';
+                    html += '<div class="upcoming-banner">';
+                    html += '<div class="upcoming-title">📅 近期日程</div>';
+                    upcoming.slice(0, 5).forEach(item => {
+                        const isToday = item.days === 0;
+                        const tag = isToday
+                            ? '<span class="upcoming-tag today">今天</span>'
+                            : '<span class="upcoming-tag">' + item.days + '天后</span>';
+                        const catColor = { travel: '#2196F3', birthday: '#e91e63', reward: '#9C27B0', event: 'var(--primary)' }[item.category] || 'var(--primary)';
+                        html += '<div class="upcoming-item"><span class="upcoming-icon" style="color:' + catColor + '">' + item.icon + '</span>';
+                        html += '<span class="upcoming-name">' + escapeHtml(item.title) + '</span>' + tag + '</div>';
                     });
                     html += '</div>';
                 }
-            } catch {}
+            } catch (e) { console.error('Banner error', e); }
 
             html += '<div class="calendar-wrap">';
 
