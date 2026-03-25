@@ -27,7 +27,7 @@ fi
 
 # 重启 Docker 容器
 log "重启 Docker 容器..."
-docker-compose down
-docker-compose up -d --build
+/usr/local/bin/docker-compose down
+/usr/local/bin/docker-compose up -d --build
 
 log "=== 部署完成 ==="
