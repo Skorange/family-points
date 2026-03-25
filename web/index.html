@@ -89,6 +89,43 @@
         .page { display: none; padding: 16px; padding-bottom: 80px; }
         .page.active { display: block; }
 
+        /* 公告 */
+        .announcement-bar {
+            background: linear-gradient(135deg, #FF6B35, #FF8E53);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            color: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .announcement-bar .ann-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .announcement-bar .ann-content { font-size: 13px; opacity: 0.9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .announcement-bar .ann-time { font-size: 11px; opacity: 0.7; margin-top: 6px; }
+        .announcement-bar .ann-edit {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            opacity: 0.8;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .announcement-bar.pinned {
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        .announcement-empty {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            color: var(--text-light);
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+        }
+
         /* 卡片 */
         .card {
             background: var(--white);
@@ -131,6 +168,7 @@
         .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
+        .btn-ghost { background: transparent; color: var(--text-light); }
 
         /* 标签 */
         .tag {
@@ -154,8 +192,6 @@
             border-bottom: 1px solid var(--border);
         }
         .list-item:last-child { border-bottom: none; }
-        .list-item .content { flex: 1; }
-        .list-item .actions { display: flex; gap: 8px; }
 
         /* 表单 */
         .form-group { margin-bottom: 16px; }
@@ -191,7 +227,7 @@
             width: 100%;
             border-radius: 16px 16px 0 0;
             padding: 20px;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
         }
@@ -203,8 +239,11 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 20px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .modal-header .close-btn { font-size: 20px; color: var(--text-light); cursor: pointer; }
         .modal-footer { display: flex; gap: 12px; margin-top: 20px; }
         .modal-footer .btn { flex: 1; }
 
@@ -221,7 +260,11 @@
             font-size: 14px;
             z-index: 300;
             animation: fadeIn 0.3s;
+            max-width: 360px;
+            text-align: center;
         }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
 
         /* 空状态 */
@@ -297,7 +340,9 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(255,107,53,0.4);
             z-index: 50;
+            display: none;
         }
+        .fab.show { display: block; }
 
         /* 成员选择网格 */
         .member-grid {
@@ -320,6 +365,35 @@
         .member-btn .avatar { font-size: 32px; margin-bottom: 4px; }
         .member-btn .name { font-size: 14px; font-weight: 600; }
         .member-btn .role { font-size: 11px; color: var(--text-light); }
+
+        /* 积分调整说明 */
+        .adjust-tip {
+            font-size: 11px;
+            color: var(--text-light);
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        /* 任务项操作按钮 */
+        .task-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+        /* 积分调整快捷按钮组 */
+        .adjust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .adjust-child {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .adjust-child .name { font-weight: 600; font-size: 15px; }
+        .adjust-child .pts { color: var(--primary); font-weight: bold; font-size: 14px; }
+        .adjust-btns { display: flex; gap: 4px; }
     </style>
 </head>
 <body>
@@ -329,7 +403,6 @@
             <h2>🎃 南瓜之家</h2>
             <p class="subtitle">家庭积分管理系统</p>
 
-            <!-- 成员选择（已设置好账号时显示） -->
             <div id="memberSelectSection">
                 <div class="member-grid" id="memberGrid"></div>
                 <div id="pwdSection" style="display:none">
@@ -339,7 +412,6 @@
                 <p class="hint">还没有账号？<a onclick="showSetup()" id="setupLink">初始化设置</a></p>
             </div>
 
-            <!-- 初始化设置（首次使用） -->
             <div id="setupSection" style="display:none">
                 <p class="subtitle" style="margin-bottom:16px">初始化家庭设置</p>
                 <div class="member-grid" id="setupMemberGrid"></div>
@@ -357,7 +429,7 @@
     <div id="appPage" style="display:none">
         <div class="header">
             <div class="header-top">
-                <h1>🎃 <span id="headerTitle">南瓜之家</span></h1>
+                <h1>🎃 南瓜之家</h1>
                 <span class="logout" onclick="doLogout()">退出</span>
             </div>
             <div style="font-size:12px;opacity:0.9;margin-top:4px" id="userInfo"></div>
@@ -390,13 +462,13 @@
 
         <!-- 任务页 -->
         <div id="tasksPage" class="page">
-            <button class="fab" onclick="showAddTask()" id="addTaskFab" style="display:none">+</button>
+            <button class="fab" id="addTaskFab" style="display:none" onclick="showAddTask()">+</button>
             <div id="tasksContent"></div>
         </div>
 
         <!-- 商城页 -->
         <div id="shopPage" class="page">
-            <button class="fab" onclick="showAddReward()" id="addRewardFab" style="display:none">+</button>
+            <button class="fab" id="addRewardFab" style="display:none" onclick="showAddReward()">+</button>
             <div id="shopContent"></div>
         </div>
 
@@ -414,26 +486,29 @@
     <!-- 添加任务模态框 -->
     <div class="modal" id="taskModal">
         <div class="modal-content">
-            <div class="modal-header" id="taskModalTitle">添加任务</div>
+            <div class="modal-header">
+                <span id="taskModalTitle">添加任务</span>
+                <span class="close-btn" onclick="closeTaskModal()">✕</span>
+            </div>
             <input type="hidden" id="editTaskId">
             <div class="form-group">
-                <label>任务名称</label>
-                <input type="text" id="taskName" placeholder="例如：整理房间">
+                <label>任务名称 *</label>
+                <input type="text" id="taskName" placeholder="例如：整理房间、按时睡觉">
             </div>
             <div class="form-group">
                 <label>描述（可选）</label>
-                <textarea id="taskDesc" rows="2" placeholder="任务描述"></textarea>
+                <textarea id="taskDesc" rows="2" placeholder="任务要求说明"></textarea>
             </div>
             <div class="form-group">
-                <label>积分奖励</label>
+                <label>积分奖励 *</label>
                 <input type="number" id="taskPoints" value="10" min="1" max="500">
             </div>
             <div class="form-group">
                 <label>重复类型</label>
                 <select id="taskRepeat">
-                    <option value="once">一次性</option>
-                    <option value="daily">每日</option>
-                    <option value="weekly">每周</option>
+                    <option value="once">一次性（做完不可重复）</option>
+                    <option value="daily">每日（每天可做一次）</option>
+                    <option value="weekly">每周（每周可做一次）</option>
                 </select>
             </div>
             <div class="modal-footer">
@@ -446,22 +521,84 @@
     <!-- 添加奖励模态框 -->
     <div class="modal" id="rewardModal">
         <div class="modal-content">
-            <div class="modal-header">添加奖励</div>
+            <div class="modal-header">
+                <span>添加奖励</span>
+                <span class="close-btn" onclick="closeRewardModal()">✕</span>
+            </div>
             <div class="form-group">
-                <label>奖励名称</label>
+                <label>奖励名称 *</label>
                 <input type="text" id="rewardName" placeholder="例如：游戏时间30分钟">
             </div>
             <div class="form-group">
-                <label>描述（可选）</label>
-                <textarea id="rewardDesc" rows="2" placeholder="奖励描述"></textarea>
+                <label>描述说明（可选）</label>
+                <textarea id="rewardDesc" rows="2" placeholder="奖励内容描述"></textarea>
             </div>
             <div class="form-group">
-                <label>所需积分</label>
+                <label>所需积分 *</label>
                 <input type="number" id="rewardCost" value="50" min="1">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeRewardModal()">取消</button>
                 <button class="btn" onclick="saveReward()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发布公告模态框 -->
+    <div class="modal" id="announceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="announceModalTitle">发布公告</span>
+                <span class="close-btn" onclick="closeAnnounceModal()">✕</span>
+            </div>
+            <input type="hidden" id="editAnnounceId">
+            <div class="form-group">
+                <label>公告标题 *</label>
+                <input type="text" id="announceTitle" placeholder="例如：本周任务调整、旅游计划">
+            </div>
+            <div class="form-group">
+                <label>公告内容</label>
+                <textarea id="announceContent" rows="5" placeholder="详细说明..."></textarea>
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="announcePinned" style="width:auto">
+                <label style="margin:0;font-size:14px">置顶公告</label>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAnnounceModal()">取消</button>
+                <button class="btn" onclick="saveAnnouncement()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 积分调整模态框 -->
+    <div class="modal" id="adjustModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="adjustModalTitle">调整积分</span>
+                <span class="close-btn" onclick="closeAdjustModal()">✕</span>
+            </div>
+            <input type="hidden" id="adjustUserId">
+            <div id="adjustChildName" style="font-weight:600;font-size:16px;margin-bottom:16px;text-align:center"></div>
+            <div class="form-group">
+                <label>调整积分 *</label>
+                <input type="number" id="adjustAmount" value="10" min="1" max="500">
+            </div>
+            <div class="form-group">
+                <label>原因说明 *</label>
+                <input type="text" id="adjustNote" placeholder="例如：主动帮忙洗碗、积极写作业">
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+                <button class="btn btn-sm btn-success" onclick="setAdjustVal(10)">+10</button>
+                <button class="btn btn-sm btn-success" onclick="setAdjustVal(20)">+20</button>
+                <button class="btn btn-sm btn-success" onclick="setAdjustVal(50)">+50</button>
+                <button class="btn btn-sm btn-success" onclick="setAdjustVal(100)">+100</button>
+                <button class="btn btn-sm btn-danger" onclick="setAdjustVal(-10)">-10</button>
+                <button class="btn btn-sm btn-danger" onclick="setAdjustVal(-20)">-20</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAdjustModal()">取消</button>
+                <button class="btn btn-success" onclick="confirmAdjust()">确认调整</button>
             </div>
         </div>
     </div>
@@ -474,14 +611,13 @@
         let currentPage = 'home';
         let isParent = false;
         let selectedMemberId = null;
-        let selectedMemberRole = null;
+        let selectedMemberName = '';
         let setupSelectedMember = null;
         let familyMembers = [];
 
-        // 页面加载
+        // ========== 初始化 ==========
         document.addEventListener('DOMContentLoaded', async () => {
             if (Api.isLoggedIn()) {
-                // 已登录，直接显示应用
                 const fresh = await refreshUserInfo();
                 if (fresh) showApp();
                 else { Api.logout(); showLogin(); }
@@ -494,7 +630,7 @@
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
             selectedMemberId = null;
-            selectedMemberRole = null;
+            setupSelectedMember = null;
             loadMemberList();
         }
 
@@ -508,37 +644,24 @@
             }
         }
 
-        // 加载成员列表用于登录选择
+        // ========== 成员选择登录 ==========
         async function loadMemberList() {
             const grid = document.getElementById('memberGrid');
             const setupGrid = document.getElementById('setupMemberGrid');
 
-            // 尝试获取成员列表（不需要登录）
-            try {
-                // 先检查是否已有账号
-                const res = await fetch('api/auth.php?action=members', { method: 'GET' });
-                const data = await res.json();
-                if (data.members && data.members.length > 0) {
-                    familyMembers = data.members;
-                    renderMemberGrid(grid, familyMembers, false);
-                    document.getElementById('memberSelectSection').style.display = 'block';
-                    document.getElementById('setupSection').style.display = 'none';
-                    document.getElementById('setupLink').style.display = '';
-                    return;
-                }
-            } catch {}
-
-            // 无账号，显示初始化
+            // 预设家庭成员
             familyMembers = [
-                { id: 'p_dad',   username: '爸爸', role: 'parent', avatar: '👨' },
-                { id: 'p_mom',   username: '妈妈', role: 'parent', avatar: '👩' },
-                { id: 'p_grandpa', username: '爷爷', role: 'parent', avatar: '👴' },
-                { id: 'p_grandma', username: '奶奶', role: 'parent', avatar: '👵' },
-                { id: 'c_pumpkin', username: '小南瓜', role: 'child', avatar: '🎃' },
+                { id: 'p_dad',     username: '爸爸',    role: 'parent', avatar: '👨' },
+                { id: 'p_mom',     username: '妈妈',    role: 'parent', avatar: '👩' },
+                { id: 'p_grandpa', username: '爷爷',    role: 'parent', avatar: '👴' },
+                { id: 'p_grandma', username: '奶奶',    role: 'parent', avatar: '👵' },
+                { id: 'c_pumpkin', username: '小南瓜',  role: 'child',  avatar: '🎃' },
                 { id: 'c_chestnut', username: '小栗子', role: 'child', avatar: '🌰' },
             ];
-            document.getElementById('memberSelectSection').style.display = 'none';
-            document.getElementById('setupSection').style.display = 'block';
+
+            renderMemberGrid(grid, familyMembers, false);
+            document.getElementById('memberSelectSection').style.display = 'block';
+            document.getElementById('setupSection').style.display = 'none';
             renderMemberGrid(setupGrid, familyMembers, true);
         }
 
@@ -565,7 +688,6 @@
                         document.getElementById('setupPassword').focus();
                     } else {
                         selectedMemberId = id;
-                        selectedMemberRole = role;
                         selectedMemberName = name;
                         document.getElementById('pwdSection').style.display = 'block';
                         document.getElementById('loginPassword').focus();
@@ -574,27 +696,22 @@
             });
         }
 
-        let selectedMemberName = '';
-
-        // 登录
         async function handleLogin() {
             const password = document.getElementById('loginPassword').value;
-            if (!selectedMemberId || !password) { showToast('请选择成员并输入密码'); return; }
+            if (!selectedMemberId || !password) { showToast('请选择成员并输入密码', 'error'); return; }
             try {
                 const data = await Api.auth.loginByMember(selectedMemberId, password);
                 showApp();
-                showToast('欢迎，' + data.user.username + '！');
-            } catch (e) { showToast(e.message); }
+                showToast('欢迎，' + data.user.username + '！', 'success');
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
-        // 初始化设置
         async function handleSetup() {
             const pw1 = document.getElementById('setupPassword').value;
             const pw2 = document.getElementById('setupPassword2').value;
-            if (!setupSelectedMember || !pw1 || !pw2) { showToast('请选择成员并填写密码'); return; }
-            if (pw1.length < 6) { showToast('密码至少6位'); return; }
-            if (pw1 !== pw2) { showToast('两次密码不一致'); return; }
-
+            if (!setupSelectedMember || !pw1 || !pw2) { showToast('请选择成员并填写密码', 'error'); return; }
+            if (pw1.length < 6) { showToast('密码至少6位', 'error'); return; }
+            if (pw1 !== pw2) { showToast('两次密码不一致', 'error'); return; }
             try {
                 const data = await Api.auth.setupFamily({
                     member_id: setupSelectedMember.id,
@@ -602,10 +719,9 @@
                     role: setupSelectedMember.role,
                     password: pw1
                 });
-                Api.setAuth(data.token, data.user);
                 showApp();
-                showToast('初始化成功！');
-            } catch (e) { showToast(e.message); }
+                showToast('初始化成功！', 'success');
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
         function showSetup() {
@@ -619,16 +735,17 @@
             setupSelectedMember = null;
         }
 
+        // ========== 应用主视图 ==========
         function showApp() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'block';
             isParent = Api.isParent();
             const user = Api.user;
-            document.getElementById('userInfo').textContent =
-                (user.avatar || '') + ' ' + user.username + ' · ' + (isParent ? '家长' : '孩子');
-            currentPage = 'home';
+            const roleText = { parent: '家长', child: '孩子' }[user.role] || '成员';
+            document.getElementById('userInfo').textContent = user.username + ' · ' + roleText;
 
-            // 重置导航高亮
+            // 重置页面状态
+            currentPage = 'home';
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelector('.nav-item').classList.add('active');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -637,18 +754,12 @@
             loadPage();
         }
 
-        // 退出登录 — 完全重置状态并刷新
         function doLogout() {
             Api.logout();
-            isParent = false;
-            currentPage = 'home';
-            selectedMemberId = null;
-            selectedMemberRole = null;
-            setupSelectedMember = null;
             location.reload();
         }
 
-        // 切换页面
+        // ========== 页面切换 ==========
         function switchPage(page) {
             currentPage = page;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -658,14 +769,13 @@
             loadPage();
         }
 
-        // 加载页面
         async function loadPage() {
-            // 家长专属元素
+            // 家长专属按钮
             const fab1 = document.getElementById('addTaskFab');
             const fab2 = document.getElementById('addRewardFab');
             const navApprove = document.getElementById('approveNav');
-            if (fab1) fab1.style.display = isParent ? 'block' : 'none';
-            if (fab2) fab2.style.display = isParent ? 'block' : 'none';
+            if (fab1) fab1.classList.toggle('show', isParent);
+            if (fab2) fab2.classList.toggle('show', isParent);
             if (navApprove) navApprove.style.display = isParent ? 'flex' : 'none';
 
             switch (currentPage) {
@@ -677,37 +787,40 @@
             }
         }
 
-        // 首页
+        // ========== 首页 ==========
         async function loadHomePage() {
             let html = '';
+
+            // 公告区域
+            html += await loadAnnouncementBar();
+
             try {
                 const rankData = await Api.points.ranking();
                 const allMembers = rankData.ranking || [];
-                // 孩子显示积分排行，家长显示孩子积分列表
+
                 if (isParent) {
                     const children = allMembers.filter(m => m.role === 'child');
                     html += '<div class="card"><div class="card-title">📊 家庭概览</div>';
                     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">';
                     html += '<div class="stat-card"><div class="num">' + children.length + '</div><div class="label">孩子数量</div></div>';
                     const pending = await Api.rewards.pendingApprovals();
-                    const pendingCount = (pending.pending || []).length;
-                    html += '<div class="stat-card"><div class="num" style="color:var(--danger)">' + pendingCount + '</div><div class="label">待审批</div></div>';
+                    html += '<div class="stat-card"><div class="num" style="color:var(--danger)">' + ((pending.pending || []).length) + '</div><div class="label">待审批</div></div>';
                     html += '</div></div>';
 
                     if (children.length > 0) {
                         html += '<div class="section-title">孩子积分</div>';
                         children.forEach(c => {
-                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                            html += '<div><div style="font-weight:600">' + c.username + '</div>';
-                            html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分余额</div></div>';
-                            html += '<div style="text-align:right"><div style="font-size:24px;color:var(--primary);font-weight:bold">' + c.points + '</div>';
-                            html += '<div style="font-size:12px;color:var(--text-light)">分</div></div></div></div>';
+                            html += '<div class="card">';
+                            html += '<div class="adjust-child">';
+                            html += '<div><div class="name">' + c.username + '</div><div class="pts">' + c.points + ' 分</div></div>';
+                            html += '<div class="adjust-btns">';
+                            html += '<button class="btn btn-sm btn-success" onclick="openAdjustModal(' + c.id + ', \'' + c.username + '\', 10)">+10</button>';
+                            html += '<button class="btn btn-sm btn-success" onclick="openAdjustModal(' + c.id + ', \'' + c.username + '\', 50)">+50</button>';
+                            html += '<button class="btn btn-sm btn-danger" onclick="openAdjustModal(' + c.id + ', \'' + c.username + '\', -10)">-10</button>';
+                            html += '</div></div></div>';
                         });
-                    } else {
-                        html += '<div class="empty"><div class="icon">👶</div><p>暂无孩子账号<br><small style="color:var(--text-light)">在「我的」页面添加</small></p></div>';
                     }
                 } else {
-                    // 孩子：我的积分
                     const pointsData = await Api.points.history();
                     html += '<div class="card points-big">';
                     html += '<div class="label">我的积分</div>';
@@ -715,7 +828,7 @@
                     html += '</div>';
                 }
 
-                // 积分排行（孩子 + 孩子，家长只在这里看）
+                // 积分排行（孩子）
                 const childMembers = allMembers.filter(m => m.role === 'child');
                 if (childMembers.length > 0) {
                     html += '<div class="section-title">🏆 积分排行</div>';
@@ -734,7 +847,107 @@
             document.getElementById('homeContent').innerHTML = html;
         }
 
-        // 任务页
+        // ========== 公告 ==========
+        async function loadAnnouncementBar() {
+            try {
+                const data = await Api.announce.list();
+                const announcements = data.announcements || [];
+                const canEdit = data.can_edit;
+
+                if (announcements.length === 0) {
+                    if (canEdit) {
+                        return '<div class="announcement-empty" onclick="openAddAnnounce()">📌 点击发布第一条公告</div>';
+                    } else {
+                        return '<div class="announcement-empty">📌 暂无公告</div>';
+                    }
+                }
+
+                const top = announcements[0];
+                let html = '';
+                html += '<div class="announcement-bar' + (top.is_pinned ? ' pinned' : '') + '" onclick="openViewAnnounce(' + top.id + ')">';
+                if (canEdit) {
+                    html += '<span class="ann-edit" onclick="event.stopPropagation();openEditAnnounce(' + top.id + ')">编辑</span>';
+                }
+                html += '<div class="ann-title">' + (top.is_pinned ? '📌 ' : '') + top.title + '</div>';
+                if (top.content) {
+                    html += '<div class="ann-content">' + top.content + '</div>';
+                }
+                html += '<div class="ann-time">' + top.author_name + ' · ' + formatDate(top.created_at) + '</div>';
+                html += '</div>';
+                return html;
+            } catch (e) { return ''; }
+        }
+
+        async function openAddAnnounce() {
+            document.getElementById('announceModalTitle').textContent = '发布公告';
+            document.getElementById('editAnnounceId').value = '';
+            document.getElementById('announceTitle').value = '';
+            document.getElementById('announceContent').value = '';
+            document.getElementById('announcePinned').checked = false;
+            document.getElementById('announceModal').classList.add('show');
+        }
+
+        async function openEditAnnounce(id) {
+            try {
+                const data = await Api.announce.list();
+                const ann = (data.announcements || []).find(a => a.id === id);
+                if (!ann) return;
+                document.getElementById('announceModalTitle').textContent = '编辑公告';
+                document.getElementById('editAnnounceId').value = id;
+                document.getElementById('announceTitle').value = ann.title;
+                document.getElementById('announceContent').value = ann.content || '';
+                document.getElementById('announcePinned').checked = ann.is_pinned == 1;
+                document.getElementById('announceModal').classList.add('show');
+            } catch (e) { showToast('加载公告失败', 'error'); }
+        }
+
+        async function openViewAnnounce(id) {
+            try {
+                const data = await Api.announce.list();
+                const ann = (data.announcements || []).find(a => a.id === id);
+                if (!ann) return;
+                document.getElementById('announceModalTitle').textContent = '公告详情';
+                document.getElementById('editAnnounceId').value = id;
+                document.getElementById('announceTitle').value = ann.title;
+                document.getElementById('announceContent').value = ann.content || '';
+                document.getElementById('announcePinned').checked = ann.is_pinned == 1;
+                document.getElementById('announceModal').classList.add('show');
+                // 详情模式：禁用标题编辑
+                document.getElementById('announceTitle').disabled = true;
+                document.getElementById('announceContent').disabled = true;
+                document.getElementById('announcePinned').disabled = true;
+                document.querySelector('#announceModal .btn-success').style.display = 'none';
+            } catch (e) {}
+        }
+
+        function closeAnnounceModal() {
+            document.getElementById('announceModal').classList.remove('show');
+            document.getElementById('announceTitle').disabled = false;
+            document.getElementById('announceContent').disabled = false;
+            document.getElementById('announcePinned').disabled = false;
+            document.querySelector('#announceModal .btn-success').style.display = '';
+        }
+
+        async function saveAnnouncement() {
+            const id = document.getElementById('editAnnounceId').value;
+            const title = document.getElementById('announceTitle').value.trim();
+            const content = document.getElementById('announceContent').value.trim();
+            const isPinned = document.getElementById('announcePinned').checked;
+            if (!title) { showToast('请输入公告标题', 'error'); return; }
+            try {
+                if (id) {
+                    await Api.announce.update({ id, title, content, is_pinned: isPinned });
+                    showToast('公告已更新', 'success');
+                } else {
+                    await Api.announce.create({ title, content, is_pinned: isPinned });
+                    showToast('公告已发布', 'success');
+                }
+                closeAnnounceModal();
+                loadHomePage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ========== 任务页 ==========
         async function loadTasksPage() {
             let html = '';
             try {
@@ -750,29 +963,106 @@
                         const canComplete = task.can_complete;
                         html += '<div class="card">';
                         html += '<div style="display:flex;justify-content:space-between;align-items:start">';
-                        html += '<div style="flex:1"><div class="card-title">' + task.title + '</div>';
-                        if (task.description) html += '<div class="card-meta">' + task.description + '</div>';
+                        html += '<div style="flex:1"><div class="card-title">' + escapeHtml(task.title) + '</div>';
+                        if (task.description) html += '<div class="card-meta">' + escapeHtml(task.description) + '</div>';
                         html += '<div class="card-meta">' + getRepeatText(task.repeat_type) + '</div></div>';
                         html += '<span class="tag">+' + task.points + '</span></div>';
-                        html += '<div style="margin-top:12px">';
+                        html += '<div class="task-actions">';
 
                         if (isParent) {
-                            html += '<button class="btn btn-sm btn-outline" style="margin-right:8px" onclick="editTask(' + task.id + ')">编辑</button>';
-                            html += '<button class="btn btn-sm btn-danger" onclick="deleteTask(' + task.id + ')">删除</button>';
+                            html += '<button class="btn btn-sm btn-outline" onclick="doEditTask(' + task.id + ')">编辑</button>';
+                            html += '<button class="btn btn-sm btn-danger" onclick="doDeleteTask(' + task.id + ')">删除</button>';
                         } else {
-                            html += '<button class="btn btn-sm ' + (canComplete ? 'btn-success' : 'btn-outline') + '" onclick="completeTask(' + task.id + ')" ' + (canComplete ? '' : 'disabled') + '>';
-                            html += canComplete ? '完成任务' : '已完成';
-                            html += '</button>';
+                            if (canComplete) {
+                                html += '<button class="btn btn-sm btn-success" onclick="doCompleteTask(' + task.id + ')">完成任务</button>';
+                            } else {
+                                html += '<button class="btn btn-sm btn-outline" disabled>已完成</button>';
+                            }
                         }
                         html += '</div></div>';
                     });
                 }
-            } catch (e) { html = '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
+            } catch (e) {
+                html = '<div class="card"><p style="color:var(--danger)">加载失败：' + e.message + '</p></div>';
+            }
 
             document.getElementById('tasksContent').innerHTML = html;
         }
 
-        // 商城页
+        function showAddTask() {
+            document.getElementById('taskModalTitle').textContent = '添加任务';
+            document.getElementById('editTaskId').value = '';
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskPoints').value = '10';
+            document.getElementById('taskRepeat').value = 'once';
+            document.getElementById('taskModal').classList.add('show');
+            document.getElementById('taskName').focus();
+        }
+
+        async function doEditTask(id) {
+            try {
+                const data = await Api.tasks.list();
+                const task = (data.tasks || []).find(t => String(t.id) === String(id));
+                if (!task) { showToast('任务不存在', 'error'); return; }
+                document.getElementById('taskModalTitle').textContent = '编辑任务';
+                document.getElementById('editTaskId').value = id;
+                document.getElementById('taskName').value = task.title;
+                document.getElementById('taskDesc').value = task.description || '';
+                document.getElementById('taskPoints').value = task.points;
+                document.getElementById('taskRepeat').value = task.repeat_type;
+                document.getElementById('taskModal').classList.add('show');
+            } catch (e) { showToast('加载失败', 'error'); }
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('show');
+        }
+
+        async function saveTask() {
+            const id = document.getElementById('editTaskId').value;
+            const title = document.getElementById('taskName').value.trim();
+            const description = document.getElementById('taskDesc').value.trim();
+            const points = parseInt(document.getElementById('taskPoints').value) || 10;
+            const repeatType = document.getElementById('taskRepeat').value;
+
+            if (!title) { showToast('请输入任务名称', 'error'); return; }
+            if (points < 1 || points > 500) { showToast('积分需在1-500之间', 'error'); return; }
+
+            try {
+                const payload = { title, description, points, repeat_type: repeatType };
+                if (id) {
+                    payload.id = parseInt(id);
+                    await Api.tasks.update(payload);
+                    showToast('任务已更新', 'success');
+                } else {
+                    await Api.tasks.create(payload);
+                    showToast('任务已创建', 'success');
+                }
+                closeTaskModal();
+                await loadTasksPage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function doCompleteTask(id) {
+            try {
+                const result = await Api.tasks.complete(id);
+                showToast('获得 ' + result.points_earned + ' 积分！', 'success');
+                await loadTasksPage();
+                await loadHomePage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function doDeleteTask(id) {
+            if (!confirm('确定删除该任务？')) return;
+            try {
+                await Api.tasks.delete(id);
+                showToast('已删除', 'success');
+                await loadTasksPage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ========== 商城页 ==========
         async function loadShopPage() {
             let html = '';
             try {
@@ -790,12 +1080,12 @@
                         rewards.forEach(r => {
                             html += '<div class="card">';
                             html += '<div style="display:flex;justify-content:space-between;align-items:center">';
-                            html += '<div style="flex:1"><div class="card-title">' + r.title + '</div>';
-                            if (r.description) html += '<div class="card-meta">' + r.description + '</div>';
-                            html += '<div class="card-meta">库存: ' + (r.stock === -1 ? '无限' : r.stock) + '</div></div>';
+                            html += '<div style="flex:1"><div class="card-title">' + escapeHtml(r.title) + '</div>';
+                            if (r.description) html += '<div class="card-meta">' + escapeHtml(r.description) + '</div>';
+                            html += '</div>';
                             html += '<span class="tag">' + r.points_cost + '分</span></div>';
                             if (!isParent) {
-                                html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="redeemReward(' + r.id + ')">申请兑换</button>';
+                                html += '<button class="btn btn-sm btn-success" style="margin-top:12px" onclick="doRedeem(' + r.id + ')">申请兑换</button>';
                             }
                             html += '</div>';
                         });
@@ -807,18 +1097,54 @@
                             const statusMap = { pending: '待审批', approved: '已通过', rejected: '已拒绝' };
                             const clsMap = { pending: 'tag-pending', approved: 'tag-success', rejected: 'tag-danger' };
                             html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                            html += '<div><div>' + r.reward_title + '</div><div class="card-meta">' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
+                            html += '<div><div>' + escapeHtml(r.reward_title) + '</div><div class="card-meta">' + r.points_spent + '积分 · ' + formatDate(r.created_at) + '</div></div>';
                             html += '<span class="tag ' + (clsMap[r.status] || '') + '">' + (statusMap[r.status] || r.status) + '</span>';
                             html += '</div></div>';
                         });
                     }
                 }
-            } catch (e) { html = '<div class="card"><p>加载失败: ' + e.message + '</p></div>'; }
+            } catch (e) { html = '<div class="card"><p style="color:var(--danger)">加载失败：' + e.message + '</p></div>'; }
 
             document.getElementById('shopContent').innerHTML = html;
         }
 
-        // 审批页（家长）
+        function showAddReward() {
+            document.getElementById('rewardName').value = '';
+            document.getElementById('rewardDesc').value = '';
+            document.getElementById('rewardCost').value = '50';
+            document.getElementById('rewardModal').classList.add('show');
+            document.getElementById('rewardName').focus();
+        }
+
+        function closeRewardModal() {
+            document.getElementById('rewardModal').classList.remove('show');
+        }
+
+        async function saveReward() {
+            const title = document.getElementById('rewardName').value.trim();
+            const description = document.getElementById('rewardDesc').value.trim();
+            const pointsCost = parseInt(document.getElementById('rewardCost').value) || 50;
+
+            if (!title) { showToast('请输入奖励名称', 'error'); return; }
+            if (pointsCost < 1) { showToast('所需积分必须大于0', 'error'); return; }
+
+            try {
+                await Api.rewards.create({ title, description, points_cost: pointsCost });
+                showToast('奖励已创建', 'success');
+                closeRewardModal();
+                await loadShopPage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function doRedeem(id) {
+            try {
+                await Api.rewards.redeem(id);
+                showToast('兑换申请已提交，等待审批', 'success');
+                await loadShopPage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ========== 审批页 ==========
         async function loadApprovePage() {
             if (!isParent) return;
             let html = '';
@@ -833,20 +1159,19 @@
                         html += '<div class="card">';
                         html += '<div style="display:flex;justify-content:space-between;align-items:center">';
                         html += '<div><div class="card-title">' + p.username + '</div>';
-                        html += '<div class="card-meta">申请兑换: ' + p.reward_title + '</div>';
+                        html += '<div class="card-meta">申请兑换: ' + escapeHtml(p.reward_title) + '</div>';
                         html += '<div class="card-meta">' + p.points_spent + '积分 · ' + formatDate(p.created_at) + '</div></div>';
                         html += '<span class="tag tag-pending">待审批</span></div>';
                         html += '<div style="display:flex;gap:8px;margin-top:12px">';
-                        html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="handleApprove(' + p.id + ', true)">通过</button>';
-                        html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="handleApprove(' + p.id + ', false)">拒绝</button>';
+                        html += '<button class="btn btn-sm btn-success" style="flex:1" onclick="doApprove(' + p.id + ', true)">通过</button>';
+                        html += '<button class="btn btn-sm btn-danger" style="flex:1" onclick="doApprove(' + p.id + ', false)">拒绝</button>';
                         html += '</div></div>';
                     });
                 }
-            } catch (e) { html = '<div class="card"><p>加载失败</p></div>'; }
+            } catch (e) { html = '<div class="card"><p style="color:var(--danger)">加载失败</p></div>'; }
 
             document.getElementById('approveContent').innerHTML = html;
 
-            // 更新角标
             try {
                 const data = await Api.rewards.pendingApprovals();
                 const count = (data.pending || []).length;
@@ -858,69 +1183,51 @@
             } catch (e) {}
         }
 
-        // 我的页面
+        async function doApprove(id, approve) {
+            try {
+                await Api.rewards.approve(id, approve ? 'approve' : 'reject');
+                showToast(approve ? '已通过' : '已拒绝', 'success');
+                await loadApprovePage();
+                await loadHomePage();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ========== 我的页面 ==========
         async function loadSettingsPage() {
             let html = '';
 
             if (isParent) {
-                html += '<div class="section-title">👨‍👩‍👧 成员管理</div>';
-                html += '<div class="card">';
-                html += '<div class="form-group"><label>添加成员</label>';
-                html += '<input type="text" id="memberName" placeholder="成员名称（如：哥哥）">';
-                html += '<select id="memberRole" style="margin-top:8px"><option value="child">孩子</option><option value="parent">家长</option></select>';
-                html += '<input type="password" id="memberPass" placeholder="设置密码（至少6位）" style="margin-top:8px">';
-                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="createMember()">添加</button></div></div>';
-
-                try {
-                    const familyData = await Api.family.list();
-                    const members = (familyData.members || []);
-                    const children = members.filter(m => m.role === 'child');
-                    const parents = members.filter(m => m.role === 'parent');
-
-                    if (parents.length > 0) {
-                        html += '<div style="margin-top:16px"><strong style="font-size:13px;color:var(--text-light)">家长</strong></div>';
-                        parents.forEach(m => {
-                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                            html += '<div style="font-weight:600">' + m.username + '</div>';
-                            html += '</div></div>';
-                        });
-                    }
-
-                    if (children.length > 0) {
-                        html += '<div style="margin-top:16px"><strong style="font-size:13px;color:var(--text-light)">孩子</strong></div>';
-                        children.forEach(c => {
-                            html += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                            html += '<div><div style="font-weight:600">' + c.username + '</div>';
-                            html += '<div style="font-size:13px;color:var(--text-light);margin-top:4px">积分: ' + c.points + '</div></div>';
-                            html += '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">';
-                            html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 10)">+10</button>';
-                            html += '<button class="btn btn-sm btn-success" onclick="adjustPoints(' + c.id + ', 50)">+50</button>';
-                            html += '<button class="btn btn-sm btn-danger" onclick="adjustPoints(' + c.id + ', -10)">-10</button>';
-                            html += '</div></div></div>';
-                        });
-                    }
-                } catch (e) {}
+                // 积分调整说明
+                html += '<div class="section-title">💰 积分调整说明</div>';
+                html += '<div class="card"><div class="adjust-tip">';
+                html += '• 点击首页孩子积分卡片上的按钮可快速调整积分<br>';
+                html += '• 详细调整：请在首页点击对应按钮，填写原因后确认<br>';
+                html += '• <b style="color:var(--success)">奖励</b>：孩子表现好时加分，记得填写原因<br>';
+                html += '• <b style="color:var(--danger)">扣分</b>：需要填写具体原因，让扣分明明白白<br>';
+                html += '• 积分调整会记录在孩子的积分明细中，孩子可在「我的」页面查看';
+                html += '</div></div>';
 
                 // 生日管理
-                html += '<div class="section-title">📅 生日管理</div>';
+                html += '<div class="section-title">🎂 生日管理</div>';
                 html += '<div class="card">';
                 html += '<div class="form-group"><label>添加生日</label>';
                 html += '<input type="text" id="birthdayName" placeholder="成员名称">';
                 html += '<input type="date" id="birthdayDate" style="margin-top:8px">';
-                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="addBirthday()">添加</button></div></div>';
+                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="doAddBirthday()">添加</button></div></div>';
                 html += '<div id="birthdayList"></div>';
 
                 // 证件管理
                 html += '<div class="section-title">📁 证件管理</div>';
                 html += '<div class="card">';
                 html += '<div class="form-group"><label>添加证件</label>';
-                html += '<input type="text" id="docName" placeholder="证件名称">';
-                html += '<input type="text" id="docInfo" placeholder="证件信息" style="margin-top:8px">';
-                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="addDocument()">添加</button></div></div>';
+                html += '<input type="text" id="docName" placeholder="证件名称（如：身份证、护照）">';
+                html += '<input type="text" id="docInfo" placeholder="证件号码" style="margin-top:8px">';
+                html += '<button class="btn btn-sm" style="margin-top:8px" onclick="doAddDocument()">添加</button></div></div>';
                 html += '<div id="documentList"></div>';
 
                 loadFamilyInfo();
             } else {
+                // 孩子：积分历史
                 html += '<div class="section-title">💰 积分明细</div>';
                 html += '<div class="card">';
                 try {
@@ -933,7 +1240,7 @@
                             const sign = h.amount > 0 ? '+' : '';
                             const color = h.amount > 0 ? 'var(--success)' : 'var(--danger)';
                             html += '<div class="list-item" style="padding:10px 0">';
-                            html += '<div><div>' + (h.note || getTypeText(h.type)) + '</div>';
+                            html += '<div><div>' + escapeHtml(h.note || getTypeText(h.type)) + '</div>';
                             html += '<div style="font-size:12px;color:var(--text-light)">' + formatDate(h.created_at) + '</div></div>';
                             html += '<div style="color:' + color + ';font-weight:600">' + sign + h.amount + '</div>';
                             html += '</div>';
@@ -942,15 +1249,29 @@
                 } catch (e) { html += '<p>加载失败</p>'; }
                 html += '</div>';
 
-                html += '<div class="section-title">🎂 家庭生日</div>';
-                html += '<div id="birthdayList"></div>';
-                loadFamilyInfo();
+                // 家庭公告
+                html += '<div class="section-title">📢 家庭公告</div>';
+                try {
+                    const adata = await Api.announce.list();
+                    const anns = adata.announcements || [];
+                    if (anns.length === 0) {
+                        html += '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无公告</p></div>';
+                    } else {
+                        anns.forEach(a => {
+                            html += '<div class="card">';
+                            html += '<div style="font-weight:600;margin-bottom:6px">' + (a.is_pinned ? '📌 ' : '') + escapeHtml(a.title) + '</div>';
+                            if (a.content) html += '<div style="font-size:14px;color:var(--text-light);margin-bottom:6px">' + escapeHtml(a.content) + '</div>';
+                            html += '<div style="font-size:12px;color:var(--text-light)">' + a.author_name + ' · ' + formatDate(a.created_at) + '</div>';
+                            html += '</div>';
+                        });
+                    }
+                } catch (e) {}
             }
 
             document.getElementById('settingsContent').innerHTML = html;
         }
 
-        // 加载家庭信息
+        // ========== 家庭资料 ==========
         async function loadFamilyInfo() {
             try {
                 const data = await Api.family.list();
@@ -958,216 +1279,124 @@
 
                 const birthdays = info.filter(i => i.category === 'birthday');
                 let bHtml = '';
+                if (birthdays.length === 0) bHtml = '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无生日记录</p></div>';
                 birthdays.forEach(b => {
                     const days = b.days_until !== undefined ? b.days_until : '?';
                     bHtml += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                    bHtml += '<div><div style="font-weight:600">🎂 ' + b.title + '</div>';
-                    bHtml += '<div style="font-size:13px;color:var(--text-light)">' + b.content + '</div></div>';
-                    if (!isParent) {
-                        bHtml += '<div style="color:var(--primary);font-weight:600">' + days + '天后</div>';
-                    }
-                    if (isParent) {
-                        bHtml += '<button class="btn btn-sm btn-danger" onclick="deleteFamilyInfo(' + b.id + ')">删除</button>';
-                    }
+                    bHtml += '<div><div style="font-weight:600">🎂 ' + escapeHtml(b.title) + '</div>';
+                    bHtml += '<div style="font-size:13px;color:var(--text-light)">' + b.content + '（' + days + '天后）</div></div>';
+                    bHtml += '<button class="btn btn-sm btn-danger" onclick="doDeleteFamilyInfo(' + b.id + ')">删除</button>';
                     bHtml += '</div></div>';
                 });
                 const bList = document.getElementById('birthdayList');
-                if (bList) bList.innerHTML = bHtml || '<div class="empty"><p>暂无生日记录</p></div>';
+                if (bList) bList.innerHTML = bHtml;
 
                 const docs = info.filter(i => i.category === 'document');
                 let dHtml = '';
+                if (docs.length === 0) dHtml = '<div class="card"><p style="text-align:center;color:var(--text-light)">暂无证件记录</p></div>';
                 docs.forEach(d => {
                     dHtml += '<div class="card"><div class="list-item" style="padding:0;border:none">';
-                    dHtml += '<div><div style="font-weight:600">📄 ' + d.title + '</div>';
-                    dHtml += '<div style="font-size:13px;color:var(--text-light)">' + d.content + '</div></div>';
-                    if (isParent) {
-                        dHtml += '<button class="btn btn-sm btn-danger" onclick="deleteFamilyInfo(' + d.id + ')">删除</button>';
-                    }
+                    dHtml += '<div><div style="font-weight:600">📄 ' + escapeHtml(d.title) + '</div>';
+                    dHtml += '<div style="font-size:13px;color:var(--text-light)">' + escapeHtml(d.content) + '</div></div>';
+                    dHtml += '<button class="btn btn-sm btn-danger" onclick="doDeleteFamilyInfo(' + d.id + ')">删除</button>';
                     dHtml += '</div></div>';
                 });
                 const dList = document.getElementById('documentList');
-                if (dList) dList.innerHTML = dHtml || '<div class="empty"><p>暂无证件记录</p></div>';
+                if (dList) dList.innerHTML = dHtml;
             } catch (e) { console.error(e); }
         }
 
-        // ========== 任务操作 ==========
-        function showAddTask() {
-            document.getElementById('taskModalTitle').textContent = '添加任务';
-            document.getElementById('editTaskId').value = '';
-            document.getElementById('taskName').value = '';
-            document.getElementById('taskDesc').value = '';
-            document.getElementById('taskPoints').value = '10';
-            document.getElementById('taskRepeat').value = 'once';
-            document.getElementById('taskModal').classList.add('show');
+        // ========== 积分调整 ==========
+        function openAdjustModal(userId, userName, presetVal) {
+            document.getElementById('adjustUserId').value = userId;
+            document.getElementById('adjustChildName').textContent = userName;
+            document.getElementById('adjustAmount').value = Math.abs(presetVal);
+            document.getElementById('adjustNote').value = '';
+            if (presetVal < 0) {
+                document.getElementById('adjustAmount').value = Math.abs(presetVal);
+            }
+            document.getElementById('adjustModal').classList.add('show');
         }
 
-        async function editTask(id) {
-            const data = await Api.tasks.list();
-            const task = (data.tasks || []).find(t => t.id == id);
-            if (!task) return;
-            document.getElementById('taskModalTitle').textContent = '编辑任务';
-            document.getElementById('editTaskId').value = id;
-            document.getElementById('taskName').value = task.title;
-            document.getElementById('taskDesc').value = task.description || '';
-            document.getElementById('taskPoints').value = task.points;
-            document.getElementById('taskRepeat').value = task.repeat_type;
-            document.getElementById('taskModal').classList.add('show');
+        function setAdjustVal(val) {
+            document.getElementById('adjustAmount').value = val < 0 ? -Math.abs(val) : Math.abs(val);
+            document.getElementById('adjustAmount').value = Math.abs(val);
+            if (val < 0) {
+                document.getElementById('adjustAmount').value = -Math.abs(val);
+            }
         }
 
-        function closeTaskModal() {
-            document.getElementById('taskModal').classList.remove('show');
+        function closeAdjustModal() {
+            document.getElementById('adjustModal').classList.remove('show');
         }
 
-        async function saveTask() {
-            const id = document.getElementById('editTaskId').value;
-            const data = {
-                title: document.getElementById('taskName').value.trim(),
-                description: document.getElementById('taskDesc').value.trim(),
-                points: parseInt(document.getElementById('taskPoints').value) || 10,
-                repeat_type: document.getElementById('taskRepeat').value
-            };
-            if (!data.title) { showToast('请输入任务名称'); return; }
-            try {
-                if (id) { data.id = id; await Api.tasks.update(data); showToast('任务已更新'); }
-                else { await Api.tasks.create(data); showToast('任务已创建'); }
-                closeTaskModal();
-                loadTasksPage();
-            } catch (e) { showToast(e.message); }
-        }
+        async function confirmAdjust() {
+            const userId = parseInt(document.getElementById('adjustUserId').value);
+            const amount = parseInt(document.getElementById('adjustAmount').value);
+            const note = document.getElementById('adjustNote').value.trim();
 
-        async function completeTask(id) {
-            try {
-                const result = await Api.tasks.complete(id);
-                showToast('获得 ' + result.points_earned + ' 积分！');
-                loadPage();
-            } catch (e) { showToast(e.message); }
-        }
+            if (!userId || !amount) { showToast('参数错误', 'error'); return; }
+            if (!note) { showToast('请填写调整原因', 'error'); return; }
 
-        async function deleteTask(id) {
-            if (!confirm('确定删除该任务？')) return;
-            try {
-                await Api.tasks.delete(id);
-                showToast('已删除');
-                loadTasksPage();
-            } catch (e) { showToast(e.message); }
-        }
-
-        // ========== 奖励操作 ==========
-        function showAddReward() {
-            document.getElementById('rewardName').value = '';
-            document.getElementById('rewardDesc').value = '';
-            document.getElementById('rewardCost').value = '50';
-            document.getElementById('rewardModal').classList.add('show');
-        }
-
-        function closeRewardModal() {
-            document.getElementById('rewardModal').classList.remove('show');
-        }
-
-        async function saveReward() {
-            const data = {
-                title: document.getElementById('rewardName').value.trim(),
-                description: document.getElementById('rewardDesc').value.trim(),
-                points_cost: parseInt(document.getElementById('rewardCost').value) || 50
-            };
-            if (!data.title) { showToast('请输入奖励名称'); return; }
-            try {
-                await Api.rewards.create(data);
-                showToast('奖励已创建');
-                closeRewardModal();
-                loadShopPage();
-            } catch (e) { showToast(e.message); }
-        }
-
-        async function redeemReward(id) {
-            try {
-                await Api.rewards.redeem(id);
-                showToast('兑换申请已提交，等待审批');
-                loadShopPage();
-            } catch (e) { showToast(e.message); }
-        }
-
-        // ========== 审批操作 ==========
-        async function handleApprove(id, approve) {
-            try {
-                await Api.rewards.approve(id, approve ? 'approve' : 'reject');
-                showToast(approve ? '已通过' : '已拒绝');
-                loadApprovePage();
-                loadPage();
-            } catch (e) { showToast(e.message); }
-        }
-
-        // ========== 成员管理 ==========
-        async function createMember() {
-            const name = document.getElementById('memberName').value.trim();
-            const role = document.getElementById('memberRole').value;
-            const pass = document.getElementById('memberPass').value;
-            if (!name || !pass) { showToast('请填写名称和密码'); return; }
-            if (pass.length < 6) { showToast('密码至少6位'); return; }
-            try {
-                if (role === 'child') {
-                    await Api.auth.createChild(name, pass);
-                } else {
-                    await Api.auth.createParent(name, pass);
-                }
-                showToast('成员已添加');
-                document.getElementById('memberName').value = '';
-                document.getElementById('memberPass').value = '';
-                loadSettingsPage();
-            } catch (e) { showToast(e.message); }
-        }
-
-        async function adjustPoints(userId, amount) {
             const type = amount > 0 ? 'bonus' : 'deduct';
             try {
-                await Api.points.adjust(Math.abs(userId), Math.abs(amount), type, type === 'bonus' ? '家长奖励' : '家长扣分');
-                showToast((amount > 0 ? '+' : '') + amount + '积分');
-                loadSettingsPage();
-            } catch (e) { showToast(e.message); }
+                await Api.points.adjust(userId, Math.abs(amount), type, note);
+                showToast((amount > 0 ? '+' : '') + amount + '积分（' + note + '）', 'success');
+                closeAdjustModal();
+                await loadHomePage();
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
-        // ========== 家庭资料 ==========
-        async function addBirthday() {
+        // ========== 家庭资料操作 ==========
+        async function doAddBirthday() {
             const name = document.getElementById('birthdayName').value.trim();
             const date = document.getElementById('birthdayDate').value;
-            if (!name || !date) { showToast('请填写名称和日期'); return; }
+            if (!name || !date) { showToast('请填写名称和日期', 'error'); return; }
             try {
                 await Api.family.create({ category: 'birthday', title: name, content: date });
-                showToast('生日已添加');
+                showToast('生日已添加', 'success');
                 document.getElementById('birthdayName').value = '';
                 document.getElementById('birthdayDate').value = '';
-                loadFamilyInfo();
-            } catch (e) { showToast(e.message); }
+                await loadFamilyInfo();
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
-        async function addDocument() {
+        async function doAddDocument() {
             const name = document.getElementById('docName').value.trim();
             const info = document.getElementById('docInfo').value.trim();
-            if (!name || !info) { showToast('请填写证件名称和信息'); return; }
+            if (!name || !info) { showToast('请填写证件名称和信息', 'error'); return; }
             try {
                 await Api.family.create({ category: 'document', title: name, content: info });
-                showToast('证件已添加');
+                showToast('证件已添加', 'success');
                 document.getElementById('docName').value = '';
                 document.getElementById('docInfo').value = '';
-                loadFamilyInfo();
-            } catch (e) { showToast(e.message); }
+                await loadFamilyInfo();
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
-        async function deleteFamilyInfo(id) {
+        async function doDeleteFamilyInfo(id) {
             if (!confirm('确定删除？')) return;
             try {
                 await Api.family.delete(id);
-                showToast('已删除');
-                loadFamilyInfo();
-            } catch (e) { showToast(e.message); }
+                showToast('已删除', 'success');
+                await loadFamilyInfo();
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
         // ========== 工具函数 ==========
-        function showToast(msg) {
+        function showToast(msg, type = '') {
             const toast = document.getElementById('toast');
+            toast.className = 'toast' + (type ? ' ' + type : '');
             toast.textContent = msg;
             toast.style.display = 'block';
             setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
         function getRepeatText(type) {
@@ -1175,13 +1404,13 @@
         }
 
         function getTypeText(type) {
-            return { earn: '完成任务', redeem: '兑换奖励', bonus: '获得奖励', deduct: '扣除积分' }[type] || type;
+            return { earn: '完成任务', redeem: '兑换奖励', bonus: '奖励加分', deduct: '扣分' }[type] || type;
         }
 
         function formatDate(str) {
             if (!str) return '';
             const d = new Date(str);
-            return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+            return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
         }
     </script>
 </body>

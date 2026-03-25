@@ -210,6 +210,30 @@ const Api = {
         }
     },
 
+    // 家庭公告
+    announce: {
+        async list() {
+            return Api.request('announce.php');
+        },
+        async create(data) {
+            return Api.request('announce.php', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+        },
+        async update(data) {
+            return Api.request('announce.php', {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+        },
+        async delete(id) {
+            return Api.request('announce.php?id=' + id, {
+                method: 'DELETE'
+            });
+        }
+    },
+
     // 家庭资料
     family: {
         async list(category = '') {
