@@ -323,10 +323,11 @@
         <div class="header">
             <h1>🎃 家庭积分星球</h1>
             <div class="user" id="userInfo">加载中...</div>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);margin-top:8px" onclick="logout()">退出登录</button>
         </div>
 
-        <div class="points-display">
-            <div class="label">我的积分</div>
+        <div class="points-display" id="pointsDisplay">
+            <div class="label" id="pointsLabel">我的积分</div>
             <div class="value"><span id="myPoints">0</span><span class="unit">分</span></div>
         </div>
 
@@ -334,7 +335,7 @@
             <div class="tab active" onclick="switchTab('tasks')">📋 任务</div>
             <div class="tab" onclick="switchTab('rewards')">🎁 奖励</div>
             <div class="tab" onclick="switchTab('family')">👨‍👩‍👧 家庭</div>
-            <div class="tab" onclick="switchTab('rank')">🏆 排行</div>
+            <div class="tab" onclick="switchTab('admin')" id="adminTab" style="display:none">⚙️ 管理</div>
         </div>
 
         <div class="content">
@@ -358,6 +359,23 @@
             <!-- 排行榜 -->
             <div id="rank" class="tab-content">
                 <div class="card rank-list" id="rankingList"></div>
+            </div>
+
+            <!-- 管理面板（家长） -->
+            <div id="admin" class="tab-content">
+                <div id="pendingRedemptions"></div>
+                <div class="section-title">创建孩子账号</div>
+                <div class="card">
+                    <div class="form-group">
+                        <input type="text" id="childUsername" placeholder="孩子用户名">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="childPassword" placeholder="密码">
+                    </div>
+                    <button class="btn" onclick="createChild()">创建账号</button>
+                </div>
+                <div class="section-title">积分调整</div>
+                <div id="childrenList"></div>
             </div>
         </div>
 
@@ -449,8 +467,14 @@
             updateUserInfo();
             loadData();
 
-            // 家长显示添加按钮
+            // 家长显示管理按钮
             document.getElementById('addBtn').style.display = isParent ? 'block' : 'none';
+            document.getElementById('adminTab').style.display = isParent ? 'block' : 'none';
+
+            // 家长隐藏积分显示（积分是孩子的）
+            if (isParent) {
+                document.getElementById('pointsDisplay').style.display = 'none';
+            }
         }
 
         // 更新用户信息
@@ -517,10 +541,12 @@
         // 加载数据
         async function loadData() {
             try {
-                // 加载积分
-                const pointsData = await Api.points.history();
-                Api.user.points = pointsData.current_points;
-                updateUserInfo();
+                // 孩子加载积分
+                if (!isParent) {
+                    const pointsData = await Api.points.history();
+                    Api.user.points = pointsData.current_points;
+                    document.getElementById('myPoints').textContent = pointsData.current_points;
+                }
 
                 // 根据当前标签加载数据
                 if (currentTab === 'tasks') {
@@ -529,8 +555,8 @@
                     loadRewards();
                 } else if (currentTab === 'family') {
                     loadFamily();
-                } else if (currentTab === 'rank') {
-                    loadRanking();
+                } else if (currentTab === 'admin') {
+                    loadAdmin();
                 }
 
                 // 加载待审批数量
@@ -539,6 +565,133 @@
                 }
             } catch (e) {
                 console.error('Load data error:', e);
+            }
+        }
+
+        // 加载管理面板
+        async function loadAdmin() {
+            await loadPendingRedemptions();
+            await loadChildren();
+        }
+
+        // 加载待审批兑换
+        async function loadPendingRedemptions() {
+            try {
+                const data = await Api.rewards.pendingApprovals();
+                const pending = data.pending || [];
+
+                let html = '<div class="section-title">待审批兑换</div>';
+                if (pending.length === 0) {
+                    html += '<p style="color:var(--text-light);text-align:center;padding:20px">暂无待审批的兑换</p>';
+                } else {
+                    pending.forEach(item => {
+                        html += `
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">${item.username}</span>
+                                    <span class="task-points">${item.points_spent}分</span>
+                                </div>
+                                <div class="card-meta">兑换: ${item.reward_title}</div>
+                                <div style="display:flex;gap:8px;margin-top:10px">
+                                    <button class="btn btn-sm btn-success" onclick="approveRedemption(${item.id})">通过</button>
+                                    <button class="btn btn-sm btn-danger" onclick="rejectRedemption(${item.id})">拒绝</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('pendingRedemptions').innerHTML = html;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 加载孩子列表
+        async function loadChildren() {
+            try {
+                const data = await Api.family.list();
+                const members = (data.members || []).filter(m => m.role === 'child');
+
+                let html = '';
+                if (members.length === 0) {
+                    html = '<p style="color:var(--text-light);text-align:center;padding:20px">暂无孩子账号</p>';
+                } else {
+                    members.forEach(child => {
+                        html += `
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">${child.username}</span>
+                                    <span class="task-points">${child.points}分</span>
+                                </div>
+                                <div style="display:flex;gap:8px;margin-top:10px">
+                                    <button class="btn btn-sm btn-success" onclick="adjustPoints(${child.id}, '${child.username}', 10, 'bonus')">+10</button>
+                                    <button class="btn btn-sm btn-success" onclick="adjustPoints(${child.id}, '${child.username}', 50, 'bonus')">+50</button>
+                                    <button class="btn btn-sm btn-danger" onclick="adjustPoints(${child.id}, '${child.username}', 10, 'deduct')">-10</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('childrenList').innerHTML = html;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 创建孩子账号
+        async function createChild() {
+            const username = document.getElementById('childUsername').value.trim();
+            const password = document.getElementById('childPassword').value;
+
+            if (!username || !password) {
+                showToast('请填写用户名和密码');
+                return;
+            }
+
+            try {
+                await Api.auth.createChild(username, password);
+                showToast('孩子账号创建成功');
+                document.getElementById('childUsername').value = '';
+                document.getElementById('childPassword').value = '';
+                loadChildren();
+                loadFamily();
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+
+        // 调整积分
+        async function adjustPoints(userId, username, amount, type) {
+            try {
+                await Api.points.adjust(userId, amount, type, type === 'bonus' ? '家长奖励' : '家长扣分');
+                showToast(`${username} ${type === 'bonus' ? '+' : '-'}${amount}积分`);
+                loadChildren();
+                loadFamily();
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+
+        // 审批兑换
+        async function approveRedemption(id) {
+            try {
+                await Api.rewards.approve(id, 'approve');
+                showToast('兑换已通过');
+                loadPendingRedemptions();
+                loadPendingCount();
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+
+        async function rejectRedemption(id) {
+            try {
+                await Api.rewards.approve(id, 'reject');
+                showToast('兑换已拒绝');
+                loadPendingRedemptions();
+                loadPendingCount();
+            } catch (e) {
+                showToast(e.message);
             }
         }
 
@@ -846,6 +999,15 @@
         function getStatusLabel(status) {
             const labels = { pending: '待审批', approved: '已通过', rejected: '已拒绝', completed: '已完成' };
             return labels[status] || status;
+        }
+
+        function logout() {
+            Api.logout();
+            document.getElementById('appPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('adminTab').style.display = 'none';
+            document.getElementById('pointsDisplay').style.display = 'block';
+            document.getElementById('addBtn').style.display = 'none';
         }
 
         function formatDate(dateStr) {
