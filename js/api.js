@@ -1,0 +1,250 @@
+/**
+ * API 调用层
+ */
+const API_BASE = 'api';
+
+const Api = {
+    // 存储 token
+    token: localStorage.getItem('token') || null,
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
+
+    // 获取请求头
+    getHeaders() {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        return headers;
+    },
+
+    // 通用请求方法
+    async request(endpoint, options = {}) {
+        const url = `${API_BASE}/${endpoint}`;
+        const config = {
+            ...options,
+            headers: {
+                ...this.getHeaders(),
+                ...options.headers
+            }
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || '请求失败');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    },
+
+    // 认证相关
+    auth: {
+        async register(email, password, username, familyName) {
+            const data = await Api.request('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'register',
+                    email,
+                    password,
+                    username,
+                    family_name: familyName
+                })
+            });
+            Api.setAuth(data.token, data.user);
+            return data;
+        },
+
+        async login(email, password) {
+            const data = await Api.request('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'login',
+                    email,
+                    password
+                })
+            });
+            Api.setAuth(data.token, data.user);
+            return data;
+        },
+
+        async createChild(username, password) {
+            return Api.request('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'create_child',
+                    username,
+                    password
+                })
+            });
+        },
+
+        async getProfile() {
+            return Api.request('auth.php');
+        }
+    },
+
+    // 任务相关
+    tasks: {
+        async list() {
+            return Api.request('tasks.php');
+        },
+
+        async create(task) {
+            return Api.request('tasks.php', {
+                method: 'POST',
+                body: JSON.stringify(task)
+            });
+        },
+
+        async complete(taskId) {
+            return Api.request('tasks.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'complete',
+                    task_id: taskId
+                })
+            });
+        },
+
+        async update(task) {
+            return Api.request('tasks.php', {
+                method: 'PUT',
+                body: JSON.stringify(task)
+            });
+        },
+
+        async delete(taskId) {
+            return Api.request(`tasks.php?id=${taskId}`, {
+                method: 'DELETE'
+            });
+        }
+    },
+
+    // 积分相关
+    points: {
+        async history() {
+            return Api.request('points.php');
+        },
+
+        async ranking() {
+            return Api.request('points.php?type=rank');
+        },
+
+        async adjust(userId, amount, type, note) {
+            return Api.request('points.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'adjust',
+                    user_id: userId,
+                    amount,
+                    type,
+                    note
+                })
+            });
+        }
+    },
+
+    // 奖励相关
+    rewards: {
+        async list() {
+            return Api.request('rewards.php');
+        },
+
+        async create(reward) {
+            return Api.request('points.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'add_reward',
+                    ...reward
+                })
+            });
+        },
+
+        async redeem(rewardId) {
+            return Api.request('points.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'redeem',
+                    reward_id: rewardId
+                })
+            });
+        },
+
+        async approve(redemptionId, action = 'approve') {
+            return Api.request('points.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'approve_redemption',
+                    redemption_id: redemptionId,
+                    action
+                })
+            });
+        },
+
+        async pendingApprovals() {
+            return Api.request('rewards.php?type=pending');
+        }
+    },
+
+    // 家庭资料
+    family: {
+        async list(category = '') {
+            const url = category ? `family.php?category=${category}` : 'family.php';
+            return Api.request(url);
+        },
+
+        async create(info) {
+            return Api.request('family.php', {
+                method: 'POST',
+                body: JSON.stringify(info)
+            });
+        },
+
+        async update(info) {
+            return Api.request('family.php', {
+                method: 'PUT',
+                body: JSON.stringify(info)
+            });
+        },
+
+        async delete(infoId) {
+            return Api.request(`family.php?id=${infoId}`, {
+                method: 'DELETE'
+            });
+        }
+    },
+
+    // 设置认证信息
+    setAuth(token, user) {
+        this.token = token;
+        this.user = user;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+    },
+
+    // 清除认证
+    logout() {
+        this.token = null;
+        this.user = null;
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    },
+
+    // 检查是否已登录
+    isLoggedIn() {
+        return !!this.token && !!this.user;
+    },
+
+    // 检查是否是家长
+    isParent() {
+        return this.user?.role === 'parent';
+    }
+};

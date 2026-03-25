@@ -6,8 +6,15 @@ services:
       - "8081:80"
     volumes:
       - ./web:/var/www/html
+      - ./api:/var/www/html/api
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_NAME=family_points
+      - DB_USER=familyuser
+      - DB_PASS=family_pass_2024
     networks:
       - family-network
 
@@ -15,22 +22,20 @@ services:
     image: mysql:8.0
     container_name: family-points-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: 19630901Ab
       MYSQL_DATABASE: family_points
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: familyuser
+      MYSQL_PASSWORD: family_pass_2024
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - family-network
-
-  webhook:
-    image: alpine/curl:latest
-    container_name: family-points-webhook
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: ["sleep", "infinity"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 networks:
   family-network:
